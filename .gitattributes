@@ -1,0 +1,8 @@
+# Line endings are settled here rather than by each contributor's core.autocrlf setting.
+# Without this, a clone on a machine with core.autocrlf=true checks every file out as CRLF,
+# `git add` then warns once per file, and that warning alone is enough to fail
+# create-scaffold-hbar's git-init step when someone scaffolds this template.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
