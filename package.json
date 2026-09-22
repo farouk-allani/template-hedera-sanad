@@ -71,5 +71,9 @@
   },
   "engines": {
     "node": ">=20.18.3"
+  },
+  "lint-staged": {
+    "packages/hardhat/**/*.ts": "yarn workspace @sh/hardhat exec eslint --fix",
+    "packages/nextjs/**/*.{ts,tsx}": "yarn workspace @sh/nextjs exec eslint --fix"
   }
 }
