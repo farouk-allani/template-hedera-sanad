@@ -167,7 +167,30 @@ enough to read in one sitting. If you need a securities platform, use the studio
 
 ## Testnet evidence
 
-Mirror node links for the transactions that prove the behaviour above, including the rollback.
+A run on Hedera testnet, 22 September 2026. Sale contract
+[`0.0.10667622`](https://hashscan.io/testnet/contract/0.0.10667622), asset `SDFU`
+[`0.0.10667614`](https://hashscan.io/testnet/token/0.0.10667614), settlement `sUSD`
+[`0.0.10667613`](https://hashscan.io/testnet/token/0.0.10667613), at 10 sUSD per unit.
+
+| What it shows | Result | Transaction |
+|---|---|---|
+| A purchase settles and delivers | `SUCCESS`, 226,422 gas | [`0x7efd…fbb7`](https://testnet.mirrornode.hedera.com/api/v1/contracts/results/0x7efd4a8982c94964a00eabebaa93ce89510d5a13418371404a9eb64f1268fbb7) |
+| Buyer without KYC: delivery refused, swap undone | `DeliveryFailed(176)`, 188,431 gas | [`0xa41e…3c1b`](https://testnet.mirrornode.hedera.com/api/v1/contracts/results/0xa41ec414917b837e59a51be7c8a98b812fd9189a7b15ecb990bf94312e633c1b) |
+| Frozen buyer: same, after approval | `DeliveryFailed(165)` | [`0x7f17…0d96`](https://testnet.mirrornode.hedera.com/api/v1/contracts/results/0x7f174259efcf5a2b99583d91800782f663df92e1321bdf590c1835c3f4f10d96) |
+| Budget below the price: pool refuses | `EXCESSIVE_INPUT_AMOUNT` | [`0xd4d1…72d8`](https://testnet.mirrornode.hedera.com/api/v1/contracts/results/0xd4d1c90d93abff30235f32cd6a01d632f4959344996c054a5033064192ef72d8) |
+| Expired quote: refused before the pool | `QuoteExpired` | [`0x6555…4e1b`](https://testnet.mirrornode.hedera.com/api/v1/contracts/results/0x6555d579b4ba06867d6d4e7b245843c75c4aca4e1e231ce29b4322f5eaba4e1b) |
+| Issuer withdraws unsold inventory | `SUCCESS` | [`0xee97…68f5`](https://testnet.mirrornode.hedera.com/api/v1/contracts/results/0xee9774325942019b2a5d8b9a8116fe0a3686cc2184118e6415986a8311f768f5) |
+
+The second row is the one worth checking. The swap had already executed inside that call; HTS then
+refused the delivery and the contract turned that response code into a full revert. Afterwards the
+ledger shows the refused buyer holding **0** units with `kyc_status=REVOKED`, while the approved
+buyer holds **2** and the issuer's sUSD is exactly 20 higher — two units at ten. Nothing settled
+halfway.
+
+Note that a rollback is **not** provable from the transaction's `token_transfers` being empty: HTS
+movements inside a contract call are not recorded on the parent record, so that field is empty for
+a successful purchase too. Balances and pool reserves are the evidence, which is what the
+acceptance suite asserts.
 
 ## Troubleshooting
 
