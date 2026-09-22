@@ -61,10 +61,15 @@ switch to change them, so the terms a buyer sees cannot be edited underneath the
 ## Try it on testnet
 
 ```bash
-yarn hardhat:account:import   # or :generate — an ECDSA key, encrypted with a password
+cp packages/hardhat/.env.example packages/hardhat/.env   # then set OPERATOR_KEY
 yarn sanad:setup              # builds tokens, buyers, pool, contract and inventory
 yarn sanad:test               # the acceptance suite, against real testnet
 ```
+
+`OPERATOR_KEY` is the hex private key of an ECDSA account from the
+[Hedera Portal](https://portal.hedera.com), used as-is so testnet costs you no password prompts.
+It is refused for any network other than testnet. For anything holding real value, leave it empty
+and use `yarn hardhat:account:import`, which keeps the key encrypted and asks for a password.
 
 `sanad:setup` spends real testnet HBAR, most of it seeding the pool. It checkpoints every step that
 costs something, so a run that fails partway resumes instead of paying twice.
