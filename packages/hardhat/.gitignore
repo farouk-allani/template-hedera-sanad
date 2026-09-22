@@ -28,3 +28,7 @@ deployments
 
 # other
 temp
+
+# Sanad testnet state: deployment record, resume checkpoint, evidence, and the throwaway
+# testnet keys for the demo role holders and buyers. Never commit any of it.
+.sanad
