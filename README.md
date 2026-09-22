@@ -50,24 +50,79 @@ variables it documents.
 
 ## Architecture
 
-Which contract holds what, which account signs what, and where the frontend reads from. Diagram to
-follow with the contract.
+- **packages/hardhat** — `SanadSale.sol`, the interfaces it needs, a mock router for local tests,
+  and the scripts that build and exercise a demo on testnet.
+- **packages/nextjs** — the app. Arrives in the next milestone.
+
+`SanadSale` holds the inventory and knows five things, all fixed at construction: the router, the
+asset, the settlement token, where the issuer is paid, and the price per unit. It has no admin
+switch to change them, so the terms a buyer sees cannot be edited underneath them.
+
+## Try it on testnet
+
+```bash
+yarn hardhat:account:import   # or :generate — an ECDSA key, encrypted with a password
+yarn sanad:setup              # builds tokens, buyers, pool, contract and inventory
+yarn sanad:test               # the acceptance suite, against real testnet
+```
+
+`sanad:setup` spends real testnet HBAR, most of it seeding the pool. It checkpoints every step that
+costs something, so a run that fails partway resumes instead of paying twice.
 
 ## The purchase flow
 
-The steps from "buyer connects a wallet" to "asset delivered", including the association and
-approval that must happen before a purchase can succeed. Written once the flow exists end to end.
+A buyer cannot simply be sent a permissioned token. The order matters, and two of the three steps
+are not the sale at all:
+
+1. **Associate.** The buyer associates their account with the asset. Hedera requires this before an
+   account can hold any balance of a token.
+2. **Approve.** The issuer grants KYC, signed by the KYC key. This can only happen *after*
+   association — `TokenGrantKyc` on an unassociated account resolves to
+   `TOKEN_NOT_ASSOCIATED_TO_ACCOUNT`.
+3. **Buy.** `buy(units, deadline)` with HBAR attached. Inside one transaction: SaucerSwap converts
+   exactly enough HBAR to pay the issuer the settlement amount, the asset moves from inventory to
+   the buyer, and the unused HBAR goes back. The network checks the token's rules during the second
+   of those. If it refuses, the first is undone with it.
 
 ## What is guaranteed, and by whom
 
-Sanad makes two different kinds of promise and the difference matters. Some are enforced by the
-Hedera network itself and hold even against a buggy frontend or a direct contract call; others are
-enforced only by the sale contract. Both lists go here, kept honest.
+The distinction matters, because only one of these two lists survives a bug in the frontend.
+
+**The ledger enforces these.** They hold against a direct contract call, a modified frontend, or a
+buyer scripting against the contract:
+
+- An unapproved or frozen buyer cannot receive the asset. Delivery is an HTS transfer, and HTS
+  applies the token's KYC, freeze and pause rules itself.
+- A paused token stops every transfer, including ours.
+- Token supply cannot be inflated by this contract: it has no supply key.
+
+**The sale contract enforces these.** They are only as good as the code, which is why the tests
+assert balances rather than error names:
+
+- Settlement is exact. The issuer receives the full price or the purchase reverts.
+- Delivery failure reverts the payment. Every HTS response code is checked. D7.
+- The buyer never spends more than the HBAR they attached, and gets the remainder back.
+- A quote past its deadline is refused before the pool is touched.
+- Only the issuer can withdraw inventory or recover HBAR.
 
 ## Key custody
 
-Who holds each of the admin, KYC, freeze, pause, wipe, supply and treasury keys, and what the holder
-of each could do outside the sale contract. Table to follow with the deployment scripts.
+The setup script gives each role its own key, because collapsing them hides what the issuer can
+actually do. All six are written to a gitignored file for the demo; in production they belong in
+separate custody.
+
+| Key | Holder in the demo | What the holder can do, without asking the sale contract |
+|---|---|---|
+| Admin | Issuer | Change the token's other keys, including replacing all of the below |
+| KYC | Compliance | Approve or un-approve any account, at any time |
+| Freeze | Compliance | Freeze a holder, blocking transfers in and out |
+| Pause | Compliance | Halt every transfer of the token at once |
+| Wipe | Compliance | Burn units from a holder. This destroys them; it does not return them to the issuer |
+| Supply | Issuer | Mint or burn supply. `SanadSale` deliberately does not hold this |
+| Treasury | Issuer account | Receive settlement, and hold unsold supply |
+
+The sale contract holds **none** of these. It is an ordinary account that happens to be associated
+and approved, so the issuer can revoke its KYC and stop sales without touching the contract.
 
 ## Why SaucerSwap, and why not just pay in the stablecoin
 
