@@ -82,18 +82,23 @@ export async function issuer(): Promise<{
   key: PrivateKey;
   evmAddress: string;
 }> {
-  const encrypted = process.env.DEPLOYER_PRIVATE_KEY_ENCRYPTED;
-  if (!encrypted) {
-    throw new Error("No deployer account. Run `yarn hardhat:account:generate` or `yarn hardhat:account:import`.");
+  // The wrapper puts the key here, whether it came from OPERATOR_KEY or from decrypting. Reading
+  // OPERATOR_KEY too means the script still works when run directly through hardhat.
+  const supplied = process.env.__RUNTIME_DEPLOYER_PRIVATE_KEY ?? process.env.OPERATOR_KEY;
+  let hex: string;
+  if (supplied?.trim()) {
+    hex = supplied.trim();
+  } else {
+    const encrypted = process.env.DEPLOYER_PRIVATE_KEY_ENCRYPTED;
+    if (!encrypted) {
+      throw new Error(
+        "No key. Set OPERATOR_KEY in packages/hardhat/.env for testnet, " +
+          "or run `yarn account:generate` / `yarn account:import` for an encrypted one.",
+      );
+    }
+    const pass = await password({ message: "Enter password to decrypt private key:" });
+    hex = (await Wallet.fromEncryptedJson(encrypted, pass)).privateKey;
   }
-  const runtimeKey = process.env.__RUNTIME_DEPLOYER_PRIVATE_KEY;
-  const hex =
-    runtimeKey ??
-    (await (async () => {
-      const pass = await password({ message: "Enter password to decrypt private key:" });
-      const wallet = await Wallet.fromEncryptedJson(encrypted, pass);
-      return wallet.privateKey;
-    })());
 
   const key = PrivateKey.fromStringECDSA(hex.replace(/^0x/, ""));
   const evmAddress = "0x" + key.publicKey.toEvmAddress().replace(/^0x/, "");
