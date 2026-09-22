@@ -1,6 +1,6 @@
 # Scaffold-HBAR
 
-A Hedera-ready monorepo for building dApps with Next.js, Hardhat or Foundry, and Hedera networks (testnet, mainnet, local fork).
+A Hedera-ready monorepo for building dApps with Next.js, Hardhat, and Hedera networks (testnet, mainnet, local fork).
 
 The full product guide — templates, CLI flags, npm vs Yarn, deploy, and verify — lives in [Scaffold HBAR on Hedera docs](https://docs.hedera.com/solutions/tools/scaffold-hbar/index). This README is for people landing on the repo: create a project, or clone `main` and run it.
 
@@ -24,7 +24,6 @@ npm create scaffold-hbar@latest
   ```bash
   corepack enable && corepack prepare yarn@stable --activate
   ```
-- **If using Foundry:** [Foundry](https://book.getfoundry.sh/getting-started/installation) (`forge`, `cast`, `anvil`)
 
 ### Quick start
 
@@ -43,15 +42,14 @@ yarn next:start
 
 Open [http://localhost:3000](http://localhost:3000) and use the **Debug Contracts** page.
 
-`yarn hardhat:deploy` without `--network localhost` targets the in-process `hardhat` network, not the long-running fork. Local Hardhat and Foundry workflows are in [`packages/hardhat/README.md`](packages/hardhat/README.md) and [`packages/foundry/README.md`](packages/foundry/README.md). Deploy and verify on testnet/mainnet: [Hedera docs](https://docs.hedera.com/solutions/tools/scaffold-hbar/index#deploying-to-testnet).
+`yarn hardhat:deploy` without `--network localhost` targets the in-process `hardhat` network, not the long-running fork. Local Hardhat workflows are in [`packages/hardhat/README.md`](packages/hardhat/README.md). Deploy and verify on testnet/mainnet: [Hedera docs](https://docs.hedera.com/solutions/tools/scaffold-hbar/index#deploying-to-testnet).
 
 ## Project layout
 
 - **packages/hardhat** — Hardhat config, contracts, `deploy/` scripts, tests
-- **packages/foundry** — Forge config, contracts, `script/` deploy scripts, tests
 - **packages/nextjs** — Next.js app, RainbowKit, wagmi, scaffold config
 
-Network and RPC URLs are in `packages/hardhat/hardhat.config.ts` and `packages/foundry/foundry.toml` respectively.
+Network and RPC URLs are in `packages/hardhat/hardhat.config.ts`.
 
 ## Links
 

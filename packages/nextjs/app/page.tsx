@@ -141,9 +141,6 @@ const Home: NextPage = () => {
                     <code className="text-xs bg-base-200 px-2 py-1 rounded">
                       yarn hardhat:deploy --network hederaTestnet
                     </code>
-                    <code className="text-xs bg-base-200 px-2 py-1 rounded">
-                      yarn foundry:deploy --network hedera_testnet
-                    </code>
                   </div>
                 </div>
               </div>
