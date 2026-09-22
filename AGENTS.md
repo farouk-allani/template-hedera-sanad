@@ -52,12 +52,19 @@ someone's money, so do not "simplify" any of them without being asked.
 yarn lint                # both packages, and CI runs it with --max-warnings=0
 yarn next:check-types
 yarn hardhat:compile
-yarn hardhat:test        # local, must never need a funded key or network access
+yarn hardhat:test        # against a fork of testnet; reaches the RPC, spends no HBAR
 yarn next:build
 ```
 
-Anything that talks to testnet is a separate, explicitly named script. A test that needs HBAR must
-never run under `yarn hardhat:test`.
+`yarn hardhat:test` is not offline. The `hardhat` network is configured with
+`forking: { url: <Hedera RPC>, chainId: 296 }`, so the suite runs against a fork of testnet and
+needs the RPC to be reachable. What it must never need is a funded key: anything that spends HBAR
+belongs in a separate, explicitly named script.
+
+The fork emulates only part of the Hedera Token Service. `associateToken`, `transferToken`,
+`balanceOf` and `getTokenInfo` work; **KYC, freeze and pause do not exist there at all**, so no
+local test can prove the behaviour Sanad is built around. Those live in the testnet suite. Do not
+"fix" a local test by asserting a KYC outcome the fork cannot produce.
 
 ## Hedera specifics that are easy to get wrong
 
