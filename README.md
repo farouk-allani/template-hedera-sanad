@@ -25,12 +25,14 @@ frontend. Sanad is the smallest correct starting point for that, meant to be for
 ## Quickstart
 
 ```bash
-npm create scaffold-hbar@latest my-sanad -- --template <owner>/<repo>
+npm create scaffold-hbar@latest my-sanad -- --template farouk-allani/template-hedera-sanad
 ```
 
 The `--` is required. Without it npm keeps `--template` for itself and the CLI never sees it, which
-silently gets you the default template instead of this one. The repository path is filled in here
-when the repository is published.
+silently gets you the default template instead of this one.
+
+Yarn is the default. `--package-manager npm` also works; the scripts set environment variables
+through `cross-env` so they run the same on Windows, macOS and Linux.
 
 ## Prerequisites
 
