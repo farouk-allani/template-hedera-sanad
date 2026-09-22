@@ -1,200 +1,125 @@
 # Agent instructions
 
-This file is the shared briefing for coding agents in this repository (Cursor, Claude Code, Codex, and any other tool that reads `AGENTS.md`). Claude Code loads it through `CLAUDE.md`.
+The shared briefing for coding agents working in this repository (Cursor, Claude Code, Codex, and
+anything else that reads `AGENTS.md`). Claude Code loads it through `CLAUDE.md`.
 
-This file provides guidance to coding agents working in this repository.
+## What this repository is
 
-## Project Overview
+Sanad sells a permissioned Hedera Token Service asset for HBAR. One transaction converts the
+buyer's HBAR to the issuer's settlement token through SaucerSwap V1, pays the issuer, and delivers
+the asset. The Hedera Token Service applies the token's KYC, freeze and pause rules at the moment
+of delivery; if it refuses, the whole transaction reverts and nothing settles.
 
-Scaffold-HBAR (`sh`) is a starter kit for building dApps on Hedera. It has two packages:
+Two packages:
 
 - **packages/hardhat**: Solidity contracts, deployed with the hardhat-deploy plugin
-- **packages/nextjs**: React frontend (Next.js App Router, not Pages Router, RainbowKit, Wagmi, Viem, TypeScript, Tailwind CSS with DaisyUI)
+- **packages/nextjs**: Next.js App Router frontend (RainbowKit, wagmi, viem, Tailwind with DaisyUI)
 
-## Common Commands
+## Invariants
 
-Use explicit package-prefixed scripts for package-specific work. Keep only truly cross-workspace commands unprefixed.
+These are the point of the template. Breaking one silently turns a correct sale into a way to lose
+someone's money, so do not "simplify" any of them without being asked.
 
-```bash
-# Development workflow (run each in separate terminal)
-yarn hardhat:chain   # Start local Hedera-forked Hardhat node
-yarn hardhat:deploy  # Deploy contracts with Hardhat
-yarn next:start      # Start Next.js frontend at http://localhost:3000
+1. **Never let a Hedera Token Service call fail quietly.** The HTS system contract at `0x167`
+   *returns* a response code; it does not revert. An unchecked non-success code means the buyer
+   paid and received nothing. Every call checks its code and reverts carrying it.
+2. **Do not add a KYC, freeze or pause check to the sale contract.** Those rules belong to the
+   token and the network enforces them at delivery. A contract-level check fails earlier but is not
+   the guarantee, and having both invites the belief that removing the network's is safe. The
+   frontend may pre-check to show a better message.
+3. **Settlement and delivery stay in one transaction.** Splitting them, or catching the delivery
+   failure to "handle it gracefully", reintroduces exactly the state this template exists to
+   prevent.
+4. **Address aliased (ECDSA) accounts by their `evm_address`,** never by the long-zero form. HTS
+   rejects transfers to the long-zero address of an account that has an alias, with
+   `INVALID_ALIAS_KEY` (282).
+5. **The issuer must be able to withdraw unsold inventory.** A sale contract that can strand the
+   asset is not finished.
 
-# Code quality
-yarn lint            # Lint all present packages
-yarn format          # Format all present packages
-
-# Building
-yarn next:build      # Build frontend
-yarn hardhat:compile # Compile Solidity contracts with Hardhat
-
-# Contract verification
-yarn hardhat:verify:testnet
-
-# Account management
-yarn hardhat:account:generate
-yarn hardhat:account:import
-yarn hardhat:account
-
-# Deploy to live network
-yarn hardhat:deploy --network <network>   # e.g., hederaTestnet, hederaMainnet
-
-yarn next:vercel:yolo --prod # deploy frontend
-```
-
-## Architecture
-
-### Smart Contract Development
+## Where things live
 
 - Contracts: `packages/hardhat/contracts/`
-- Deployment scripts: `packages/hardhat/deploy/` (uses hardhat-deploy plugin)
+- Deploy scripts: `packages/hardhat/deploy/` (hardhat-deploy; `snake_case` filenames)
 - Tests: `packages/hardhat/test/`
-- Config: `packages/hardhat/hardhat.config.ts`
-- Deploying specific contract:
-  - If the deploy script has:
-    ```typescript
-    // In packages/hardhat/deploy/01_deploy_my_contract.ts
-    deployMyContract.tags = ["MyContract"];
-    ```
- - `yarn hardhat:deploy --tags MyContract`
-- After `yarn hardhat:deploy`, ABIs are auto-generated to `packages/nextjs/contracts/deployedContracts.ts`
+- Hardhat config and networks: `packages/hardhat/hardhat.config.ts`
+- Frontend config and networks: `packages/nextjs/scaffold.config.ts`
+- After a deploy, ABIs are generated into `packages/nextjs/contracts/deployedContracts.ts`; never
+  edit that by hand.
 
-### Frontend Contract Interaction
+## Verifying a change
 
-**Correct interact hook names (use these):**
+```bash
+yarn lint                # both packages, and CI runs it with --max-warnings=0
+yarn next:check-types
+yarn hardhat:compile
+yarn hardhat:test        # local, must never need a funded key or network access
+yarn next:build
+```
 
-- `useScaffoldReadContract` - NOT ~~useScaffoldContractRead~~
-- `useScaffoldWriteContract` - NOT ~~useScaffoldContractWrite~~
+Anything that talks to testnet is a separate, explicitly named script. A test that needs HBAR must
+never run under `yarn hardhat:test`.
 
-Contract data is read from two files in `packages/nextjs/contracts/`:
+## Hedera specifics that are easy to get wrong
 
-- `deployedContracts.ts`: Auto-generated from deployments
-- `externalContracts.ts`: Manually added external contracts
+- **Units.** Inside a contract, HBAR values (`msg.value`, balances) are tinybars, 8 decimals.
+  Clients send weibars, 18 decimals, and the JSON-RPC relay converts. Mixing them is a 10^10 error.
+- **`receive()` is not a guard.** Hedera does not trigger `receive()` or `fallback()` on native
+  HBAR transfers, so a contract's balance can change without its code running. Use explicit
+  functions for HBAR, and do not treat "only the router can send me HBAR" as airtight.
+- **Reads go through the mirror node.** A balance read immediately after a receipt can be stale.
+  Wait for the mirror node to ingest the transaction before asserting on state.
+- **SaucerSwap has two WHBAR addresses.** `WHBAR()` is the wrapper contract and `whbar()` is the
+  HTS token. Swap paths must start with the token, or the router reverts with `INVALID_PATH`.
 
-#### Reading Contract Data
+## Frontend contract interaction
+
+Use the hooks in `packages/nextjs/hooks/scaffold-hbar` (legacy path segment; the branding is
+Scaffold-HBAR / `sh`). The names are `useScaffoldReadContract` and `useScaffoldWriteContract`, not
+`useScaffoldContractRead` / `useScaffoldContractWrite`.
 
 ```typescript
-const { data: totalCounter } = useScaffoldReadContract({
+const { data } = useScaffoldReadContract({
   contractName: "YourContract",
-  functionName: "userGreetingCounter",
-  args: ["0xd8da6bf26964af9d7eed9e03e53415d37aa96045"],
+  functionName: "someView",
+  args: [address],
 });
+
+const { writeContractAsync } = useScaffoldWriteContract({ contractName: "YourContract" });
+await writeContractAsync({ functionName: "doThing", args: [x], value: parseEther("0.01") });
 ```
 
-#### Writing to Contracts
+Also available: `useScaffoldWatchContractEvent`, `useScaffoldEventHistory`,
+`useDeployedContractInfo`, `useScaffoldContract`, `useTransactor`.
 
-```typescript
-const { writeContractAsync, isPending } = useScaffoldWriteContract({
-  contractName: "YourContract",
-});
+Contract data comes from two files in `packages/nextjs/contracts/`: `deployedContracts.ts`
+(generated) and `externalContracts.ts` (hand-written, for contracts we do not deploy).
 
-await writeContractAsync({
-  functionName: "setGreeting",
-  args: [newGreeting],
-  value: parseEther("0.01"), // for payable functions
-});
-```
+## UI components
 
-#### Reading Events
+Use `@scaffold-hbar-ui/components` for web3 UI: `Address`, `AddressInput`, `Balance`, `EtherInput`,
+`IntegerInput`.
 
-```typescript
-const { data: events, isLoading } = useScaffoldEventHistory({
-  contractName: "YourContract",
-  eventName: "GreetingChange",
-  watch: true,
-  fromBlock: 31231n,
-  blockData: true,
-});
-```
+## Styling
 
-Scaffold-HBAR also provides other hooks to interact with blockchain data: `useScaffoldWatchContractEvent`, `useScaffoldEventHistory`, `useDeployedContractInfo`, `useScaffoldContract`, `useTransactor`.
-
-**IMPORTANT: Always use hooks from `packages/nextjs/hooks/scaffold-hbar` for contract interactions (legacy path segment; project branding is Scaffold-HBAR / `sh`). Always refer to the hook names as they exist in the codebase.**
-
-### UI Components
-
-**Always use `@scaffold-hbar-ui/components` library for web3 UI components:**
-
-- `Address`: Display Hedera EVM addresses with blockie avatars and explorer links
-- `AddressInput`: Input field with address validation
-- `Balance`: Show HBAR balance in tinybar/HBAR and fiat equivalent
-- `EtherInput`: Number input for EVM value entry (kept for EVM compatibility)
-- `IntegerInput`: Integer-only input with wei conversion
-
-### Styling
-
-**Use DaisyUI classes** for building frontend components.
+Use DaisyUI classes rather than raw Tailwind where DaisyUI has a component.
 
 ```tsx
-// ✅ Good - using DaisyUI classes
-<button className="btn btn-primary">Connect</button>
-<div className="card bg-base-100 shadow-xl">...</div>
-
-// ❌ Avoid - raw Tailwind when DaisyUI has a component
-<button className="px-4 py-2 bg-blue-500 text-white rounded">Connect</button>
+<button className="btn btn-primary">Connect</button>   // good
+<button className="px-4 py-2 bg-blue-500 rounded">Connect</button>   // avoid
 ```
 
-### Configure Target Network before deploying to testnet / mainnet.
+## Code style
 
-#### Hardhat
+| Style            | Applies to                                                            |
+| ---------------- | --------------------------------------------------------------------- |
+| `UpperCamelCase` | class, interface, type, enum, decorator, type parameter, TSX component |
+| `lowerCamelCase` | variable, parameter, function, property, module alias                  |
+| `CONSTANT_CASE`  | constants and global variables                                         |
+| `snake_case`     | hardhat deploy filenames                                               |
 
-Add networks in `packages/hardhat/hardhat.config.ts` if not present.
-
-#### NextJs
-
-Add networks in `packages/nextjs/scaffold.config.ts` if not present. This file also contains configuration for polling interval, API keys. Remember to decrease the polling interval for L2 chains.
-
-## Code Style Guide
-
-### Identifiers
-
-
-| Style            | Category                                                                                                               |
-| ---------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `UpperCamelCase` | class / interface / type / enum / decorator / type parameters / component functions in TSX / JSXElement type parameter |
-| `lowerCamelCase` | variable / parameter / function / property / module alias                                                              |
-| `CONSTANT_CASE`  | constant / enum / global variables                                                                                     |
-| `snake_case`     | for hardhat deploy files                                                                                               |
-
-
-### Import Paths
-
-Use the `~~` path alias for imports in the nextjs package:
-
-```tsx
-import { useTargetNetwork } from "~~/hooks/scaffold-hbar";
-```
-
-### Creating Pages
-
-```tsx
-import type { NextPage } from "next";
-
-const Home: NextPage = () => {
-  return <div>Home</div>;
-};
-
-export default Home;
-```
-
-### TypeScript Conventions
-
-- Use `type` over `interface` for custom types
-- Types use `UpperCamelCase` without `T` prefix (use `Address` not `TAddress`)
-- Avoid explicit typing when TypeScript can infer the type
-
-### Comments
-
-Make comments that add information. Avoid redundant JSDoc for simple functions.
-
-## Documentation
-
-Use **Context7 MCP** tools to fetch up-to-date documentation for any library (Wagmi, Viem, RainbowKit, DaisyUI, Hardhat, Next.js, etc.). Context7 is configured as an MCP server and provides access to indexed documentation with code examples.
-
-## Specialized Agents
-
-Use these specialized agents for specific tasks:
-
-- `**grumpy-carlos-code-reviewer`**: Use this agent for code reviews before finalizing changes
-
+- Import with the `~~` alias in the nextjs package: `import { x } from "~~/hooks/scaffold-hbar"`.
+- Prefer `type` over `interface`; no `T` prefix on type names.
+- Let TypeScript infer what it can.
+- Every Solidity function carries NatSpec. Use custom errors, not revert strings.
+- Comments explain *why*, cite the Hedera rule that forces the code, or warn. A comment that
+  restates the line below it is noise; delete it.
