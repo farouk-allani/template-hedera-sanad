@@ -1,0 +1,40 @@
+{
+  "name": "sanad",
+  "description": "Permissioned asset sale on Hedera: the buyer pays HBAR, SaucerSwap V1 converts it to the issuer's settlement token, and the HTS token's own KYC, freeze and pause rules decide whether delivery happens. All in one transaction.",
+  "version": "0.1.0",
+  "create-scaffold-hbar": {
+    "requirements": {
+      "node": ">=20.18.3"
+    },
+    "capabilities": {
+      "frontend": ["nextjs-app"],
+      "solidityFramework": ["hardhat"],
+      "packageManager": ["yarn", "npm"]
+    },
+    "defaults": {
+      "frontend": "nextjs-app",
+      "solidityFramework": "hardhat",
+      "packageManager": "yarn"
+    },
+    "outro": {
+      "sections": [
+        {
+          "title": "Run it locally",
+          "steps": [
+            { "label": "Start a Hedera-forked node", "command": "{run:hardhat:chain}" },
+            { "label": "Deploy to it", "command": "{run:hardhat:deploy} --network localhost" },
+            { "label": "Start the app", "command": "{run:next:start}", "url": "http://localhost:3000" }
+          ]
+        },
+        {
+          "title": "Before you touch testnet",
+          "steps": [
+            { "text": "Copy each package's .env.example to .env in that package. Never commit them." },
+            { "text": "Fund an ECDSA account from the Hedera Portal faucet.", "url": "https://portal.hedera.com/faucet" },
+            { "text": "README.md covers the setup, the architecture and what Sanad does and does not guarantee." }
+          ]
+        }
+      ]
+    }
+  }
+}
