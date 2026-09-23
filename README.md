@@ -31,6 +31,16 @@ npm create scaffold-hbar@latest my-sanad -- --template farouk-allani/template-he
 The `--` is required. Without it npm keeps `--template` for itself and the CLI never sees it, which
 silently gets you the default template instead of this one.
 
+```bash
+cd my-sanad
+yarn next:start               # then open http://localhost:3000
+```
+
+The app opens on a live demo sale on Hedera testnet, so there is something real to look at before
+you deploy anything. Connect a wallet on Hedera Testnet to associate and see the approval step;
+finishing a purchase needs the sale's compliance wallet to approve you, which is the point. To run
+the whole flow yourself, deploy your own sale: see [Try it on testnet](#try-it-on-testnet).
+
 Yarn is the default. `--package-manager npm` also works; the scripts set environment variables
 through `cross-env` so they run the same on Windows, macOS and Linux.
 
@@ -160,10 +170,10 @@ The setup script gives each role its own key, because collapsing them hides what
 actually do. All six are written to a gitignored file for the demo; in production they belong in
 separate custody.
 
-| Key | Holder in the demo | What the holder can do, without asking the sale contract |
+| Key | Who should hold it | What the holder can do, without asking the sale contract |
 |---|---|---|
 | Admin | Issuer | Change the token's other keys, including replacing all of the below |
-| KYC | Compliance officer's account, created by setup | Approve or un-approve any account, at any time |
+| KYC | Compliance. In the demo, the account setup creates for it, so a browser wallet can sign | Approve or un-approve any account, at any time |
 | Freeze | Compliance | Freeze a holder, blocking transfers in and out |
 | Pause | Compliance | Halt every transfer of the token at once |
 | Wipe | Compliance | Burn units from a holder. This destroys them; it does not return them to the issuer |
@@ -276,10 +286,10 @@ Sale contract [`0.0.10667622`](https://hashscan.io/testnet/contract/0.0.10667622
 | A wallet without the KYC key tries to approve itself | `SUCCESS`, returned **7**, nothing changed | [`0xcd66…df6a`](https://testnet.mirrornode.hedera.com/api/v1/contracts/results/0xcd664f18de80e360c97064a1333f5a433ae175939f92037f0ee34e356714df6a) |
 
 The second row is the one worth checking. The swap had already executed inside that call; HTS then
-refused the delivery and the contract turned that response code into a full revert. Afterwards the
-ledger shows the refused buyer holding **0** units with `kyc_status=REVOKED`, while the approved
-buyer holds **2** and the issuer's sUSD is exactly 20 higher — two units at ten. Nothing settled
-halfway.
+refused the delivery and the contract turned that response code into a full revert. Right after that
+first run, the ledger showed the refused buyer holding **0** units with `kyc_status=REVOKED`, while
+the approved buyer held **2** and the issuer's sUSD was exactly 20 higher: two units at ten. Nothing
+settled halfway.
 
 Note that a rollback is **not** provable from the transaction's `token_transfers` being empty: HTS
 movements inside a contract call are not recorded on the parent record, so that field is empty for
