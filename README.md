@@ -62,7 +62,7 @@ switch to change them, so the terms a buyer sees cannot be edited underneath the
 
 ```bash
 cp packages/hardhat/.env.example packages/hardhat/.env   # then set OPERATOR_KEY
-yarn sanad:setup              # builds tokens, buyers, pool, contract and inventory
+yarn sanad:setup              # tokens, compliance account, buyers, pool, contract, inventory
 yarn sanad:test               # the acceptance suite, against real testnet
 ```
 
@@ -73,6 +73,13 @@ and use `yarn hardhat:account:import`, which keeps the key encrypted and asks fo
 
 `sanad:setup` spends real testnet HBAR, most of it seeding the pool. It checkpoints every step that
 costs something, so a run that fails partway resumes instead of paying twice.
+
+The demo's keys, one per token role plus the two buyers', are written to
+`packages/hardhat/.sanad/testnet.keys.json`, which is gitignored. Setup also creates an account
+controlled by the KYC key, because approving a buyer means signing with that key. To approve buyers
+from the app, import the `kyc` key from that file into a browser wallet. It is a throwaway testnet
+key; in production the KYC key belongs to whoever actually carries out compliance, on their own
+device.
 
 ## The purchase flow
 
@@ -119,7 +126,7 @@ separate custody.
 | Key | Holder in the demo | What the holder can do, without asking the sale contract |
 |---|---|---|
 | Admin | Issuer | Change the token's other keys, including replacing all of the below |
-| KYC | Compliance | Approve or un-approve any account, at any time |
+| KYC | Compliance officer's account, created by setup | Approve or un-approve any account, at any time |
 | Freeze | Compliance | Freeze a holder, blocking transfers in and out |
 | Pause | Compliance | Halt every transfer of the token at once |
 | Wipe | Compliance | Burn units from a holder. This destroys them; it does not return them to the issuer |

@@ -31,7 +31,8 @@ export const EVIDENCE_FILE = path.join(ROOT, ".sanad", "testnet-run.json");
 /** The token keys the demo generates separately, one per role. The treasury is an account, not a key. */
 export type RoleName = "admin" | "kyc" | "freeze" | "pause" | "wipe" | "supply";
 
-export interface BuyerRef {
+/** An account created with an ECDSA key as its alias, so a browser wallet holding the key can act as it. */
+export interface AccountRef {
   id: string;
   evm: string;
 }
@@ -52,7 +53,9 @@ export interface Deployment {
   sanad: string;
   sanadId: string;
   pricePerUnit: string;
-  buyers: { approved: BuyerRef; unapproved: BuyerRef };
+  /** The account whose key is the asset's KYC key: the wallet that approves buyers. */
+  complianceOfficer: AccountRef;
+  buyers: { approved: AccountRef; unapproved: AccountRef };
 }
 
 /** Private keys for the demo role holders and buyers. Testnet throwaways. */

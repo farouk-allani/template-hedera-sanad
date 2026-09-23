@@ -1,10 +1,11 @@
 /**
- * Builds a complete Sanad demo on Hedera testnet: a settlement token, a permissioned asset whose
- * seven key roles are held by seven different keys, two buyers of which only one is approved, a
- * SaucerSwap V1 pool, the sale contract, and its opening inventory.
+ * Builds a complete Sanad demo on Hedera testnet: a settlement token, a permissioned asset with a
+ * different key for each of its six roles, an account for the compliance officer who holds the KYC
+ * key, two buyers of which only one is approved, a SaucerSwap V1 pool, the sale contract, and its
+ * opening inventory.
  *
- * Run it with `yarn sanad:setup` from the repository root, not directly: the deployer key has to
- * be decrypted into the environment before hardhat reads its config.
+ * Run it with `yarn sanad:setup` from the repository root, not directly: hardhat reads the
+ * deployer key from its config before any script runs, and the wrapper is what puts it there.
  *
  * A finished run creates NEW tokens, a NEW pool and a NEW contract, so re-running costs testnet
  * HBAR again. A run that fails partway leaves .sanad/testnet.partial.json behind and the next run
@@ -28,7 +29,7 @@ import {
   TransferTransaction,
 } from "@hashgraph/sdk";
 import {
-  BuyerRef,
+  AccountRef,
   CHECKPOINT_FILE,
   DEPLOYMENT_FILE,
   Deployment,
@@ -58,6 +59,7 @@ const CONFIG = {
   poolHbar: 100n, // whole HBAR seeded into the pool
   poolSettlement: 1_000n, // whole sUSD seeded. Demo ratio: 1 HBAR ~ 10 sUSD
   buyerFundingHbar: 30,
+  complianceFundingHbar: 5, // an approval or revocation costs about 0.04 HBAR
 };
 
 const ROLES: RoleName[] = ["admin", "kyc", "freeze", "pause", "wipe", "supply"];
@@ -182,24 +184,37 @@ async function run(client: Client, issuerId: AccountId, issuerEvm: string) {
   );
   console.log(`  ${assetTokenId}  ${hashscan("token", assetTokenId.toString())}`);
 
-  step("Creating two buyers, both associated with the asset");
-  async function createBuyer(label: "approved" | "unapproved"): Promise<BuyerRef> {
-    const key = PrivateKey.generateECDSA();
+  async function createAliasedAccount(key: PrivateKey, hbar: number): Promise<AccountRef> {
     const createTx = await new AccountCreateTransaction()
       .setECDSAKeyWithAlias(key)
-      .setInitialBalance(new Hbar(CONFIG.buyerFundingHbar))
+      .setInitialBalance(new Hbar(hbar))
       .setMaxAutomaticTokenAssociations(0) // association is explicit, like real onboarding
       .freezeWith(client)
       .sign(key);
     const id = (await (await createTx.execute(client)).getReceipt(client)).accountId!;
+    return { id: id.toString(), evm: "0x" + key.publicKey.toEvmAddress().replace(/^0x/, "") };
+  }
+
+  step("Creating the compliance officer's account, controlled by the KYC key");
+  // Buyers are approved by a wallet whose account key is the KYC key, calling the HTS system
+  // contract directly. Without an account behind the key, no wallet could approve anyone.
+  const complianceOfficer = await once("complianceOfficer", () =>
+    createAliasedAccount(roleKeys.kyc, CONFIG.complianceFundingHbar),
+  );
+  console.log(`  ${complianceOfficer.id}  ${complianceOfficer.evm}`);
+
+  step("Creating two buyers, both associated with the asset");
+  async function createBuyer(label: "approved" | "unapproved"): Promise<AccountRef> {
+    const key = PrivateKey.generateECDSA();
+    const buyer = await createAliasedAccount(key, CONFIG.buyerFundingHbar);
     saveKey(`buyer.${label}`, "0x" + key.toStringRaw());
     const associate = await new TokenAssociateTransaction()
-      .setAccountId(id)
+      .setAccountId(AccountId.fromString(buyer.id))
       .setTokenIds([assetTokenId])
       .freezeWith(client)
       .sign(key);
     await (await associate.execute(client)).getReceipt(client);
-    return { id: id.toString(), evm: "0x" + key.publicKey.toEvmAddress().replace(/^0x/, "") };
+    return buyer;
   }
   const approved = await once("buyer.approved", () => createBuyer("approved"));
   const unapproved = await once("buyer.unapproved", () => createBuyer("unapproved"));
@@ -333,11 +348,15 @@ async function run(client: Client, issuerId: AccountId, issuerEvm: string) {
     sanad: deployed.address,
     sanadId,
     pricePerUnit: pricePerUnit.toString(),
+    complianceOfficer,
     buyers: { approved, unapproved },
   };
   writeJson(DEPLOYMENT_FILE, deployment);
   fs.rmSync(CHECKPOINT_FILE, { force: true }); // finished; the next run starts fresh
-  console.log(`\n✓ Setup complete. Wrote ${DEPLOYMENT_FILE}\n  Next: yarn sanad:test`);
+  console.log(`\n✓ Setup complete. Wrote ${DEPLOYMENT_FILE}`);
+  console.log(`  To approve buyers from the app, import the "kyc" key from ${KEYS_FILE} into your wallet.`);
+  console.log(`  It controls ${complianceOfficer.id} (${complianceOfficer.evm}), a throwaway testnet account.`);
+  console.log("  Next: yarn sanad:test");
 }
 
 main().catch(error => {
