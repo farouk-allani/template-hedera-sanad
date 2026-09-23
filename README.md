@@ -89,6 +89,16 @@ from the app, import the `kyc` key from that file into a browser wallet. It is a
 key; in production the KYC key belongs to whoever actually carries out compliance, on their own
 device.
 
+What it costs, measured on testnet in September 2026. Hedera prices fees in US dollars and charges
+the HBAR equivalent at the current exchange rate, so these move with the rate.
+
+| Action | Cost |
+|---|---|
+| `sanad:setup` | About 200 HBAR: the SaucerSwap pool-creation fee (25.95 HBAR on 22 September), 100 HBAR of pool liquidity, 30 HBAR for each of the two demo buyers, 5 for the compliance account, and gas |
+| A buyer associating with the asset, once | 0.79 HBAR |
+| Approving or revoking a buyer | 0.04 HBAR |
+| A purchase | 0.21 HBAR in fees, plus the HBAR the pool takes for the settlement amount |
+
 ## The purchase flow
 
 A buyer cannot simply be sent a permissioned token. The order matters, and two of the three steps

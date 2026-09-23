@@ -19,19 +19,32 @@
     "outro": {
       "sections": [
         {
-          "title": "Run it locally",
+          "title": "See it working",
           "steps": [
-            { "label": "Start a Hedera-forked node", "command": "{run:hardhat:chain}" },
-            { "label": "Deploy to it", "command": "{run:hardhat:deploy} --network localhost" },
-            { "label": "Start the app", "command": "{run:next:start}", "url": "http://localhost:3000" }
+            {
+              "label": "Start the app. It opens on a live demo sale on Hedera testnet",
+              "command": "{run:next:start}",
+              "url": "http://localhost:3000"
+            }
           ]
         },
         {
-          "title": "Before you touch testnet",
+          "title": "Run the whole flow on your own sale",
           "steps": [
-            { "text": "Copy each package's .env.example to .env in that package. Never commit them." },
             { "text": "Fund an ECDSA account from the Hedera Portal faucet.", "url": "https://portal.hedera.com/faucet" },
-            { "text": "README.md covers the setup, the architecture and what Sanad does and does not guarantee." }
+            {
+              "text": "Copy packages/hardhat/.env.example to .env there and set OPERATOR_KEY to that account's key. Testnet only; never commit it."
+            },
+            {
+              "label": "Create tokens, pool, contract and inventory, and point the app at them",
+              "command": "{run:sanad:setup}"
+            },
+            { "label": "Prove the guarantees against testnet", "command": "{run:sanad:test}" }
+          ]
+        },
+        {
+          "steps": [
+            { "text": "README.md explains the purchase flow, what is guaranteed and by whom, the key custody, and the costs." }
           ]
         }
       ]
