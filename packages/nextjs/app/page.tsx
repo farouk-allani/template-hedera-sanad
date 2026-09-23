@@ -5,7 +5,7 @@ import Link from "next/link";
 import { HederaPortalFaucet } from "@scaffold-hbar-ui/components";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
-import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { BugAntIcon } from "@heroicons/react/24/outline";
 import { HederaAddress } from "~~/components/scaffold-hbar";
 import { useTargetNetwork } from "~~/hooks/scaffold-hbar";
 
@@ -90,19 +90,6 @@ const Home: NextPage = () => {
               </p>
               <Link href="/debug" passHref className="btn btn-primary btn-sm">
                 Open Debug
-              </Link>
-            </div>
-
-            <div className="bg-base-100 rounded-2xl shadow-md p-8 text-center flex flex-col items-center border border-base-300 relative">
-              <div className="w-14 h-14 rounded-full hedera-gradient flex items-center justify-center mb-4">
-                <MagnifyingGlassIcon className="h-7 w-7 text-white" />
-              </div>
-              <h3 className="font-bold text-lg mb-2">Block Explorer</h3>
-              <p className="text-base-content/70 text-sm m-0 mb-6">
-                Explore transactions, addresses, and contract activity on Hedera.
-              </p>
-              <Link href="/blockexplorer" passHref className="btn btn-primary btn-sm">
-                Open Block Explorer
               </Link>
             </div>
           </div>
