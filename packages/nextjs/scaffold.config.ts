@@ -8,33 +8,20 @@ export type ScaffoldConfig = {
   walletConnectProjectId: string;
 };
 
-const hederaLocalFork = {
-  ...chains.hardhat,
-  name: "Hedera Local Fork",
-  nativeCurrency: {
-    name: "HBAR",
-    symbol: "HBAR",
-    // Note: HBAR has 8 protocol decimals (tinybar),
-    // but JSON-RPC msg.value & gasPrice use 18 decimals for EVM compatibility.
-    // We keep 18 here so tx.value formatting matches what viem/hardhat return.
-    decimals: 18,
-  },
-} as const satisfies chains.Chain;
-
-const targetNetworks = [chains.hederaTestnet, chains.hedera, hederaLocalFork] as const satisfies readonly [
-  chains.Chain,
-  ...chains.Chain[],
-];
+// Testnet only. SanadSale reads a live SaucerSwap router when it is deployed, so it cannot exist on
+// a local node, and mainnet has no deployment and holds real value.
+const targetNetworks = [chains.hederaTestnet] as const satisfies readonly [chains.Chain, ...chains.Chain[]];
 
 const scaffoldConfig = {
   targetNetworks,
 
   pollingInterval: 10000,
 
-  enableBurnerWallet: true,
+  // A burner key lives in one browser's storage and starts with no Hedera account. A buyer of a
+  // permissioned asset needs a wallet they keep, because that account is what the issuer approves.
+  enableBurnerWallet: false,
 
   rpcOverrides: {
-    [chains.hedera.id]: process.env.NEXT_PUBLIC_HEDERA_MAINNET_RPC_URL || "https://mainnet.hashio.io/api",
     [chains.hederaTestnet.id]: process.env.NEXT_PUBLIC_HEDERA_TESTNET_RPC_URL || "https://testnet.hashio.io/api",
   },
 
