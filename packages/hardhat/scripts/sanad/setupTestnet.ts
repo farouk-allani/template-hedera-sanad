@@ -2,7 +2,7 @@
  * Builds a complete Sanad demo on Hedera testnet: a settlement token, a permissioned asset with a
  * different key for each of its six roles, an account for the compliance officer who holds the KYC
  * key, two buyers of which only one is approved, a SaucerSwap V1 pool, the sale contract, and its
- * opening inventory.
+ * opening inventory. It then points the frontend at the new sale.
  *
  * Run it with `yarn sanad:setup` from the repository root, not directly: hardhat reads the
  * deployer key from its config before any script runs, and the wrapper is what puts it there.
@@ -13,6 +13,7 @@
  */
 import fs from "node:fs";
 import hre from "hardhat";
+import generateTsAbis from "../generateTsAbis";
 import {
   AccountAllowanceApproveTransaction,
   AccountCreateTransaction,
@@ -306,6 +307,9 @@ async function run(client: Client, issuerId: AccountId, issuerEvm: string) {
   });
   const sanadId = await contractIdOf(deployed.address);
   console.log(`  ${sanadId}  ${hashscan("contract", sanadId)}`);
+  // hardhat-deploy's `deploy` task regenerates the frontend's contract list; `hardhat run`, which
+  // runs this script, does not. Without this the app would keep pointing at the previous sale.
+  await generateTsAbis(hre);
 
   step("Associating the sale contract, granting it KYC, and moving inventory in");
   await once("sanad.associate", async () => {
