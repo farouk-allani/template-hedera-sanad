@@ -64,8 +64,9 @@ export function useDeployedContractInfo<TContractName extends ContractName>(
           address: deployedContract.address,
         });
 
-        // If contract code is `0x` => no contract deployed on that address
-        if (code === "0x") {
+        // viem returns undefined, not "0x", when an address holds no code. Comparing with "0x" alone
+        // reported a contract that testnet had wiped as deployed, and every read of it then hung.
+        if (!code || code === "0x") {
           setStatus(ContractCodeStatus.NOT_FOUND);
           return;
         }
