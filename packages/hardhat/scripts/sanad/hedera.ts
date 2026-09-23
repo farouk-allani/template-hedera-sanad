@@ -128,6 +128,8 @@ export interface ContractResult {
   hash: string;
   result: string;
   error_message: string | null;
+  /** What the call returned. For a direct system-contract call, the HTS response code. */
+  call_result: string | null;
 }
 
 /**
@@ -170,6 +172,16 @@ export async function waitForRelationship(
     await sleep(1500);
   }
   throw new Error(`Token relationship ${accountId}/${tokenId} never reached the expected state`);
+}
+
+/** Polls until the mirror node reports the token paused or unpaused. */
+export async function waitForPauseStatus(tokenId: string, status: "PAUSED" | "UNPAUSED"): Promise<void> {
+  for (let i = 0; i < 20; i++) {
+    const token = await mirror<{ pause_status: string }>(`/api/v1/tokens/${tokenId}`);
+    if (token.pause_status === status) return;
+    await sleep(1500);
+  }
+  throw new Error(`Token ${tokenId} never reached pause_status ${status}`);
 }
 
 /** Decodes mirror node revert data: our custom errors, or the router's Error(string). */

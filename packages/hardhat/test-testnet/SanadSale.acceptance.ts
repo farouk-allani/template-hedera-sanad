@@ -13,7 +13,16 @@
  */
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { AccountId, PrivateKey, TokenFreezeTransaction, TokenId, TokenUnfreezeTransaction } from "@hashgraph/sdk";
+import {
+  AccountId,
+  PrivateKey,
+  TokenFreezeTransaction,
+  TokenId,
+  TokenPauseTransaction,
+  TokenRevokeKycTransaction,
+  TokenUnfreezeTransaction,
+  TokenUnpauseTransaction,
+} from "@hashgraph/sdk";
 import type { ContractTransactionResponse, Provider, Wallet } from "ethers";
 import type { SanadSale } from "../typechain-types";
 import {
@@ -27,13 +36,25 @@ import {
   issuer,
   mirrorTxUrl,
   readJson,
+  tokenRelationship,
   waitForContractResult,
+  waitForPauseStatus,
   waitForRelationship,
   writeJson,
 } from "../scripts/sanad/hedera";
 
+const INVALID_SIGNATURE = 7n;
+const SUCCESS = 22n;
 const ACCOUNT_FROZEN_FOR_TOKEN = 165n;
 const ACCOUNT_KYC_NOT_GRANTED_FOR_TOKEN = 176n;
+const TOKEN_IS_PAUSED = 265n;
+
+/** The HTS system contract. A compliance wallet calls it directly, with no contract in between. */
+const HTS = "0x0000000000000000000000000000000000000167";
+const HTS_KYC = [
+  "function grantTokenKyc(address token, address account) returns (int64 responseCode)",
+  "function revokeTokenKyc(address token, address account) returns (int64 responseCode)",
+];
 
 /** buy() used ~226k gas in the spike; 1.5M is ample and leaves a revert on-chain as evidence. */
 const GAS_LIMIT = 1_500_000n;
@@ -89,15 +110,22 @@ describe("SanadSale on testnet: HBAR in, exact settlement out, permissioned deli
   let sale: SanadSale;
   let approved: Wallet;
   let unapproved: Wallet;
+  let complianceWallet: Wallet;
   let freezeKey: PrivateKey;
-  const evidence: { test: string; result: string; revert?: string; mirror: string }[] = [];
+  let pauseKey: PrivateKey;
+  let kycKey: PrivateKey;
+  const evidence: { test: string; result: string; revert?: string; returned?: string; mirror: string }[] = [];
 
   before(async function () {
     d = readJson<Deployment>(DEPLOYMENT_FILE);
     const keys = readJson<StoredKeys>(KEYS_FILE);
     approved = new ethers.Wallet(keys["buyer.approved"]!, ethers.provider);
     unapproved = new ethers.Wallet(keys["buyer.unapproved"]!, ethers.provider);
+    // The account whose key is the asset's KYC key: what the issuer console connects as. D36.
+    complianceWallet = new ethers.Wallet(keys.kyc!, ethers.provider);
     freezeKey = PrivateKey.fromStringECDSA(keys.freeze!.replace(/^0x/, ""));
+    pauseKey = PrivateKey.fromStringECDSA(keys.pause!.replace(/^0x/, ""));
+    kycKey = PrivateKey.fromStringECDSA(keys.kyc!.replace(/^0x/, ""));
     sale = await ethers.getContractAt("SanadSale", d.sanad);
   });
 
@@ -124,6 +152,21 @@ describe("SanadSale on testnet: HBAR in, exact settlement out, permissioned deli
   async function quote() {
     const [hbarRequired, settlementAmount] = await sale.getFunction("quote")(UNITS);
     return { hbarRequired: hbarRequired as bigint, settlementAmount: settlementAmount as bigint };
+  }
+
+  /**
+   * Sends a KYC call straight to the HTS system contract, as a browser wallet does, and reads back
+   * both the transaction's outcome and the response code the call returned. They can disagree.
+   */
+  async function kycCall(from: Wallet, fn: "grantTokenKyc" | "revokeTokenKyc", account: string, label: string) {
+    const hts = new ethers.Contract(HTS, HTS_KYC, from);
+    const tx = (await hts.getFunction(fn)(d.asset, account, { gasLimit: 200_000 })) as ContractTransactionResponse;
+    await tx.wait().catch(() => null);
+    const result = await waitForContractResult(tx.hash);
+    const returned = result.call_result ? BigInt(result.call_result) : undefined;
+    evidence.push({ test: label, result: result.result, returned: String(returned), mirror: mirrorTxUrl(tx.hash) });
+    console.log(`      ${result.result}, returned ${returned}\n      ${mirrorTxUrl(tx.hash)}`);
+    return { result: result.result, returned };
   }
 
   const inFuture = () => BigInt(Math.floor(Date.now() / 1000) + 300);
@@ -266,5 +309,81 @@ describe("SanadSale on testnet: HBAR in, exact settlement out, permissioned deli
     }
 
     expect((await asset.balanceOf(d.sanad)) as bigint, "inventory untouched").to.equal(inventoryBefore);
+  });
+
+  it("8. paused asset: the simulation reports the refusal, the network refuses delivery, nothing settles", async function () {
+    const { client } = await issuer();
+    const tokenId = TokenId.fromString(d.assetTokenId);
+    const pause = await new TokenPauseTransaction().setTokenId(tokenId).freezeWith(client).sign(pauseKey);
+    await (await pause.execute(client)).getReceipt(client);
+    try {
+      await waitForPauseStatus(d.assetTokenId, "PAUSED");
+      const { hbarRequired } = await quote();
+      const budget = hbarRequired * 2n;
+
+      // What a wallet's pre-flight sees: the refusal, before anything is signed or paid for.
+      const simulated = await sale
+        .connect(approved)
+        .getFunction("buy")
+        .staticCall(UNITS, inFuture(), { value: budget * WEIBAR_PER_TINYBAR })
+        .then(
+          () => "no revert",
+          (error: { data?: string }) => decodeRevert(error.data ?? null, sale.interface),
+        );
+      expect(simulated).to.equal(`DeliveryFailed(${TOKEN_IS_PAUSED})`);
+
+      const before = await snapshot(d, ethers.provider, approved.address);
+      const { result, revert, maxFeeWeibar } = await buy(approved, budget, inFuture(), "paused asset");
+      expect(result.result).to.equal("CONTRACT_REVERT_EXECUTED");
+      expect(revert).to.equal(`DeliveryFailed(${TOKEN_IS_PAUSED})`);
+      expectNothingSettled(before, await snapshot(d, ethers.provider, approved.address), maxFeeWeibar);
+    } finally {
+      const unpause = await new TokenUnpauseTransaction().setTokenId(tokenId).freezeWith(client).sign(pauseKey);
+      await (await unpause.execute(client)).getReceipt(client);
+      client.close();
+      await waitForPauseStatus(d.assetTokenId, "UNPAUSED");
+    }
+  });
+
+  it("9. the compliance wallet approves and revokes a buyer with plain EVM calls to 0x167", async function () {
+    const buyer = d.buyers.unapproved;
+    const before = await tokenRelationship(buyer.id, d.assetTokenId);
+    expect(before?.kyc_status, "precondition: associated, not approved").to.equal("REVOKED");
+    try {
+      const grant = await kycCall(complianceWallet, "grantTokenKyc", buyer.evm, "compliance wallet grants KYC");
+      expect(grant.result).to.equal("SUCCESS");
+      expect(grant.returned, "HTS response code").to.equal(SUCCESS);
+      await waitForRelationship(buyer.id, d.assetTokenId, r => r?.kyc_status === "GRANTED");
+
+      const revoke = await kycCall(complianceWallet, "revokeTokenKyc", buyer.evm, "compliance wallet revokes KYC");
+      expect(revoke.result).to.equal("SUCCESS");
+      expect(revoke.returned, "HTS response code").to.equal(SUCCESS);
+      await waitForRelationship(buyer.id, d.assetTokenId, r => r?.kyc_status === "REVOKED");
+    } finally {
+      // Test 2 needs this buyer unapproved on every run, so a failure here must not leave it granted.
+      if ((await tokenRelationship(buyer.id, d.assetTokenId))?.kyc_status === "GRANTED") {
+        const { client } = await issuer();
+        const revoke = await new TokenRevokeKycTransaction()
+          .setAccountId(AccountId.fromString(buyer.id))
+          .setTokenId(TokenId.fromString(d.assetTokenId))
+          .freezeWith(client)
+          .sign(kycKey);
+        await (await revoke.execute(client)).getReceipt(client);
+        client.close();
+      }
+    }
+  });
+
+  it("10. a wallet without the KYC key cannot approve anyone, and its transaction still succeeds", async function () {
+    const buyer = d.buyers.unapproved;
+    // The buyer tries to approve itself. Its account key is not the asset's KYC key.
+    const attempt = await kycCall(unapproved, "grantTokenKyc", buyer.evm, "self-approval without the KYC key");
+
+    // The refusal is only in the return value: the Ethereum transaction itself succeeds, so a
+    // frontend that trusts the receipt would report an approval that never happened. D36.
+    expect(attempt.result).to.equal("SUCCESS");
+    expect(attempt.returned, "HTS response code").to.equal(INVALID_SIGNATURE);
+    // waitForContractResult already waited for the mirror node to ingest the call.
+    expect((await tokenRelationship(buyer.id, d.assetTokenId))?.kyc_status).to.equal("REVOKED");
   });
 });

@@ -167,8 +167,8 @@ enough to read in one sitting. If you need a securities platform, use the studio
 
 ## Testnet evidence
 
-A run on Hedera testnet, 22 September 2026. Sale contract
-[`0.0.10667622`](https://hashscan.io/testnet/contract/0.0.10667622), asset `SDFU`
+Runs of the acceptance suite on Hedera testnet, 22 and 23 September 2026, against one deployment.
+Sale contract [`0.0.10667622`](https://hashscan.io/testnet/contract/0.0.10667622), asset `SDFU`
 [`0.0.10667614`](https://hashscan.io/testnet/token/0.0.10667614), settlement `sUSD`
 [`0.0.10667613`](https://hashscan.io/testnet/token/0.0.10667613), at 10 sUSD per unit.
 
@@ -180,6 +180,10 @@ A run on Hedera testnet, 22 September 2026. Sale contract
 | Budget below the price: pool refuses | `EXCESSIVE_INPUT_AMOUNT` | [`0xd4d1…72d8`](https://testnet.mirrornode.hedera.com/api/v1/contracts/results/0xd4d1c90d93abff30235f32cd6a01d632f4959344996c054a5033064192ef72d8) |
 | Expired quote: refused before the pool | `QuoteExpired` | [`0x6555…4e1b`](https://testnet.mirrornode.hedera.com/api/v1/contracts/results/0x6555d579b4ba06867d6d4e7b245843c75c4aca4e1e231ce29b4322f5eaba4e1b) |
 | Issuer withdraws unsold inventory | `SUCCESS` | [`0xee97…68f5`](https://testnet.mirrornode.hedera.com/api/v1/contracts/results/0xee9774325942019b2a5d8b9a8116fe0a3686cc2184118e6415986a8311f768f5) |
+| Paused asset: delivery refused, swap undone | `DeliveryFailed(265)` | [`0xad79…2d40`](https://testnet.mirrornode.hedera.com/api/v1/contracts/results/0xad79d104d759095377c2ac79fea3e3465376c674c63eff1aa8678dda4f022d40) |
+| Compliance wallet approves a buyer from a plain EVM wallet | `SUCCESS`, returned 22 | [`0x9251…2a3e`](https://testnet.mirrornode.hedera.com/api/v1/contracts/results/0x925168f2f9a3564e6e4ddc24694e8697137d3d1c53c0ad9f9779a4f837692a3e) |
+| … and revokes the approval | `SUCCESS`, returned 22 | [`0xd11f…6d8f`](https://testnet.mirrornode.hedera.com/api/v1/contracts/results/0xd11ff3030b5a4d1c75e0da9a0c92a1dd4018525d9e17ffe77a40092df7ff6d8f) |
+| A wallet without the KYC key tries to approve itself | `SUCCESS`, returned **7**, nothing changed | [`0xcd66…df6a`](https://testnet.mirrornode.hedera.com/api/v1/contracts/results/0xcd664f18de80e360c97064a1333f5a433ae175939f92037f0ee34e356714df6a) |
 
 The second row is the one worth checking. The swap had already executed inside that call; HTS then
 refused the delivery and the contract turned that response code into a full revert. Afterwards the
@@ -191,6 +195,11 @@ Note that a rollback is **not** provable from the transaction's `token_transfers
 movements inside a contract call are not recorded on the parent record, so that field is empty for
 a successful purchase too. Balances and pool reserves are the evidence, which is what the
 acceptance suite asserts.
+
+The last row is the one to remember when writing a frontend. The Ethereum transaction succeeds, and
+the refusal (`INVALID_SIGNATURE`, 7) exists only in the value the call returned. Anything that trusts
+the receipt reports an approval that never happened. Simulation does not help either: it returns
+success for that call whoever sends it.
 
 ## Troubleshooting
 
