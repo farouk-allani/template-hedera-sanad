@@ -183,7 +183,7 @@ export const PurchaseForm = ({ sale, buyer }: { sale: Sale; buyer: Address }) =>
 
       {purchase && (
         <div role="status" className="alert alert-success alert-soft items-start">
-          <div className="flex flex-col gap-1 text-sm">
+          <div className="flex flex-col gap-1 text-sm text-base-content">
             <p className="font-semibold m-0">
               You bought {purchase.units.toString()} {symbol}.
             </p>
