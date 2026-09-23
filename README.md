@@ -123,6 +123,12 @@ both. Before asking the wallet to sign, it simulates the purchase as the buyer. 
 network would make, whether not approved, frozen, paused or the price moved past the maximum, shows
 up in that simulation, so the page explains it before anything is paid.
 
+`/activity` lists what the sale contract recorded, every purchase and every withdrawal, each linked
+to its transaction on HashScan, and where every buyer stands now. Approvals and revocations have no
+history there. They are token operations rather than sale events, and the mirror node cannot list
+them by token, because its record of each one names the account, not the asset. A history of them
+would need a log of its own, such as a Hedera Consensus Service topic written alongside each change.
+
 ## What is guaranteed, and by whom
 
 The distinction matters, because only one of these two lists survives a bug in the frontend.
