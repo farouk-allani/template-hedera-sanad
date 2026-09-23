@@ -35,6 +35,14 @@ someone's money, so do not "simplify" any of them without being asked.
    `INVALID_ALIAS_KEY` (282).
 5. **The issuer must be able to withdraw unsold inventory.** A sale contract that can strand the
    asset is not finished.
+6. **Never report an HTS operation from its receipt.** A KYC change sent to `0x167`, and a token's
+   own `associate()`, report refusal as a returned response code inside a successful transaction.
+   A wallet without the KYC key gets 7 (`INVALID_SIGNATURE`) and a successful receipt, and
+   simulation says success too. Read the code back from the mirror node and wait for the state to
+   change there (`packages/nextjs/hooks/sanad/useHtsCalls.ts`), and work out which keys the
+   connected wallet holds before offering an action (`packages/nextjs/hooks/sanad/useWalletRoles.ts`).
+   Do not route these calls through `useTransactor`, which announces success for any receipt that
+   did not revert.
 
 ## Where things live
 

@@ -163,6 +163,19 @@ separate custody.
 The sale contract holds **none** of these. It is an ordinary account that happens to be associated
 and approved, so the issuer can revoke its KYC and stop sales without touching the contract.
 
+The issuer console, `/issuer`, reads these keys from the ledger and names the account holding each
+one where it can: the ledger links a key to an account only when an account uses it as its own key.
+Before offering anything, the console works out which of two authorities the connected wallet has.
+Approving a buyer takes the KYC key; withdrawing inventory takes the sale's owner, the account that
+deployed it. They are usually different wallets, and the console names the one to connect.
+
+Buyers are found through association, the one on-chain step a buyer takes before approval, which
+Hedera requires anyway. The console lists every account associated with the asset, apart from the
+treasury and the sale itself, with each one's standing. Anyone can associate, so the list shows who
+asked, not who has been checked: checking who a buyer is happens outside the ledger, and approving
+records the decision on it. A buyer can also send their account ID, or a link that opens the console
+on their account.
+
 ## Why SaucerSwap, and why not just pay in the stablecoin
 
 Because the two sides want different things. The buyer holds HBAR and does not want to go and
@@ -233,7 +246,9 @@ acceptance suite asserts.
 The last row is the one to remember when writing a frontend. The Ethereum transaction succeeds, and
 the refusal (`INVALID_SIGNATURE`, 7) exists only in the value the call returned. Anything that trusts
 the receipt reports an approval that never happened. Simulation does not help either: it returns
-success for that call whoever sends it.
+success for that call whoever sends it. So the issuer console checks that the connected wallet's
+key is the KYC key before it offers an approval, and after sending one it reads the returned code
+back from the mirror node and waits until the buyer's status has actually changed there.
 
 ## Troubleshooting
 
