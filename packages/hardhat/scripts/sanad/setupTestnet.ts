@@ -135,7 +135,7 @@ async function run(client: Client, issuerId: AccountId, issuerEvm: string) {
     ).getReceipt(client);
   }
 
-  step("Generating a separate key for each token role (D12)");
+  step("Generating a separate key for each token role");
   const roleKeys = loadRoleKeys();
   for (const role of ROLES) console.log(`  ${role.padEnd(7)} ${roleKeys[role].publicKey.toStringRaw().slice(0, 24)}…`);
 
@@ -284,7 +284,7 @@ async function run(client: Client, issuerId: AccountId, issuerEvm: string) {
   const deployed = await deployments.deploy("SanadSale", {
     from: deployer,
     // The issuer treasury must be the account's EVM alias. HTS refuses the long-zero form of an
-    // aliased account: the pool's payout returned INVALID_ALIAS_KEY (282). D9.
+    // aliased account: the pool's payout returned INVALID_ALIAS_KEY (282).
     args: [routerAddr, evm(assetTokenId), settlementEvm, issuerEvm, pricePerUnit],
     log: true,
     autoMine: true,

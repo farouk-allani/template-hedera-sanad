@@ -12,7 +12,7 @@ import { ethers } from "hardhat";
  * What is deliberately NOT here: anything depending on KYC, freeze or pause. The forking plugin
  * does not implement them at all — they are commented out of its own IHederaTokenService — so a
  * local test asserting a 176 rollback would be asserting a fiction. That behaviour is proved
- * against real testnet in the testnet suite. See D26.
+ * against real testnet in the testnet suite.
  */
 
 const WHBAR_TOKEN = "0x0000000000000000000000000000000000003ad2";
@@ -140,7 +140,7 @@ describe("SanadSale", function () {
       await router.setAmountIn(1_000n);
       // ASSET is not a real HTS token, so the delivery call cannot succeed. What this proves is
       // that a failed delivery aborts the purchase rather than being ignored: the swap already
-      // ran by this point. D7.
+      // ran by this point.
       await expect(sale.buy(1, inFuture(), { value: 10_000n })).to.be.reverted;
       expect(await ethers.provider.getBalance(await sale.getAddress())).to.equal(0n);
     });

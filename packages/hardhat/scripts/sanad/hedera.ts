@@ -28,7 +28,7 @@ export const KEYS_FILE = path.join(ROOT, ".sanad", "testnet.keys.json");
 /** Mirror node links for the last acceptance run, for the submission. */
 export const EVIDENCE_FILE = path.join(ROOT, ".sanad", "testnet-run.json");
 
-/** The seven key roles a Hedera token can separate. The demo gives each its own key. D12. */
+/** The token keys the demo generates separately, one per role. The treasury is an account, not a key. */
 export type RoleName = "admin" | "kyc" | "freeze" | "pause" | "wipe" | "supply";
 
 export interface BuyerRef {

@@ -105,7 +105,7 @@ buyer scripting against the contract:
 assert balances rather than error names:
 
 - Settlement is exact. The issuer receives the full price or the purchase reverts.
-- Delivery failure reverts the payment. Every HTS response code is checked. D7.
+- Delivery failure reverts the payment. Every HTS response code is checked.
 - The buyer never spends more than the HBAR they attached, and gets the remainder back.
 - A quote past its deadline is refused before the pool is touched.
 - Only the issuer can withdraw inventory or recover HBAR.

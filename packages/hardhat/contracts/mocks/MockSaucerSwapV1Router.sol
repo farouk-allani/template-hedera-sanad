@@ -9,11 +9,11 @@ import { ISaucerSwapV1Router } from "../interfaces/ISaucerSwapV1Router.sol";
 ///      hedera-forking plugin treats long-zero addresses as HTS tokens and answers calls to them
 ///      itself, so a forked test that reads the real router gets back data of the wrong shape and
 ///      the call reverts with "function returned an unexpected amount of data". Deploying this at
-///      an ordinary address sidesteps that, and makes the tests deterministic and offline.
+///      an ordinary address sidesteps that, and keeps the tests independent of testnet reserves.
 ///
 ///      The revert strings are `Error(string)` rather than custom errors on purpose: the real
 ///      router is a UniswapV2 fork and reverts exactly this way, and tests assert on those
-///      strings. See D7 for why Sanad itself uses custom errors instead.
+///      strings. SanadSale itself uses custom errors, so a refusal carries its HTS response code.
 contract MockSaucerSwapV1Router is ISaucerSwapV1Router {
     address private immutable _factory;
     address private immutable _whbarContract;

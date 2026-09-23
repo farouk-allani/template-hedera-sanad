@@ -1,12 +1,12 @@
 /**
  * Acceptance tests against real Hedera testnet. They live outside `test/` on purpose: everything
- * in `test/` runs under `yarn hardhat:test`, which must never need a funded key. D20.
+ * in `test/` runs under `yarn hardhat:test`, which must never need a funded key.
  *
  *   yarn sanad:setup   # once, builds tokens, pool, contract and inventory
  *   yarn sanad:test
  *
  * These are the tests that matter. KYC, freeze and pause do not exist in the local fork, so this
- * is the only place the behaviour Sanad exists for can actually be proved. D26.
+ * is the only place the behaviour Sanad exists for can actually be proved.
  *
  * Every rollback test compares pool reserves and balances, not just the error: a revert with the
  * right name would still be a failure if the swap had already paid the issuer.
@@ -121,7 +121,7 @@ describe("SanadSale on testnet: HBAR in, exact settlement out, permissioned deli
     const keys = readJson<StoredKeys>(KEYS_FILE);
     approved = new ethers.Wallet(keys["buyer.approved"]!, ethers.provider);
     unapproved = new ethers.Wallet(keys["buyer.unapproved"]!, ethers.provider);
-    // The account whose key is the asset's KYC key: what the issuer console connects as. D36.
+    // The account whose key is the asset's KYC key: what the issuer console connects as.
     complianceWallet = new ethers.Wallet(keys.kyc!, ethers.provider);
     freezeKey = PrivateKey.fromStringECDSA(keys.freeze!.replace(/^0x/, ""));
     pauseKey = PrivateKey.fromStringECDSA(keys.pause!.replace(/^0x/, ""));
@@ -219,7 +219,7 @@ describe("SanadSale on testnet: HBAR in, exact settlement out, permissioned deli
 
     expect(result.result).to.equal("CONTRACT_REVERT_EXECUTED");
     // Reaching our own error proves HTS *returned* 176 rather than reverting by itself, and that
-    // the contract turned that code into a full rollback. D7.
+    // the contract turned that code into a full rollback.
     expect(revert).to.equal(`DeliveryFailed(${ACCOUNT_KYC_NOT_GRANTED_FOR_TOKEN})`);
     expectNothingSettled(before, await snapshot(d, ethers.provider, unapproved.address), maxFeeWeibar);
   });
@@ -380,7 +380,7 @@ describe("SanadSale on testnet: HBAR in, exact settlement out, permissioned deli
     const attempt = await kycCall(unapproved, "grantTokenKyc", buyer.evm, "self-approval without the KYC key");
 
     // The refusal is only in the return value: the Ethereum transaction itself succeeds, so a
-    // frontend that trusts the receipt would report an approval that never happened. D36.
+    // frontend that trusts the receipt would report an approval that never happened.
     expect(attempt.result).to.equal("SUCCESS");
     expect(attempt.returned, "HTS response code").to.equal(INVALID_SIGNATURE);
     // waitForContractResult already waited for the mirror node to ingest the call.
