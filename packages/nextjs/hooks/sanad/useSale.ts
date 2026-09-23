@@ -1,4 +1,4 @@
-import type { Address } from "viem";
+import { type Address, getAddress } from "viem";
 import { useMirror } from "~~/hooks/sanad/useMirror";
 import { useDeployedContractInfo, useScaffoldReadContract } from "~~/hooks/scaffold-hbar";
 import { tokenIdFromAddress } from "~~/utils/sanad/hts";
@@ -62,17 +62,25 @@ export function useSale(): SaleState {
   if (!contract) return { status: "missing" };
   if (!asset || !settlement || !owner || !issuerTreasury || pricePerUnit === undefined) return { status: "loading" };
 
+  // The scaffold registers contract addresses as plain strings (types/abitype/abi.d.ts), and whether
+  // that registration applies depends on how the package manager lays out node_modules: the reads
+  // are typed `string` under npm and `0x${string}` under Yarn. getAddress types them the same way
+  // under both, and checksums them.
   return {
     status: "ready",
     sale: {
       address: contract.address,
       abi: contract.abi,
       contractId: entity.data?.contract_id,
-      owner,
-      issuerTreasury,
+      owner: getAddress(owner),
+      issuerTreasury: getAddress(issuerTreasury),
       pricePerUnit,
-      asset: { address: asset, id: tokenIdFromAddress(asset), token: assetToken.data ?? undefined },
-      settlement: { address: settlement, id: tokenIdFromAddress(settlement), token: settlementToken.data ?? undefined },
+      asset: { address: getAddress(asset), id: tokenIdFromAddress(asset), token: assetToken.data ?? undefined },
+      settlement: {
+        address: getAddress(settlement),
+        id: tokenIdFromAddress(settlement),
+        token: settlementToken.data ?? undefined,
+      },
       inventory: holding.data?.tokens[0]?.balance,
     },
   };
