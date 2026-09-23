@@ -85,6 +85,10 @@ The fork emulates only part of the Hedera Token Service. `associateToken`, `tran
 local test can prove the behaviour Sanad is built around. Those live in the testnet suite. Do not
 "fix" a local test by asserting a KYC outcome the fork cannot produce.
 
+`gitleaks git .` must report no leaks. `.gitleaks.toml` lets through exactly two findings that are
+not secrets, each explained there. If gitleaks flags anything else, remove the secret and rotate it;
+never add an entry to make the scan pass.
+
 ## Hedera specifics that are easy to get wrong
 
 - **Units.** Inside a contract, HBAR values (`msg.value`, balances) are tinybars, 8 decimals.

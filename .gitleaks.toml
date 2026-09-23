@@ -1,0 +1,26 @@
+# gitleaks loads this file by itself when it scans this directory. It keeps every default rule and
+# lets through exactly two findings, neither of them a secret. If gitleaks flags something new,
+# remove the secret and rotate it; do not add an entry here.
+
+[extend]
+useDefault = true
+
+# .yarn/releases/yarn-3.2.3.cjs is Yarn's official 3.2.3 release, byte for byte, sha256
+# 311cd84f5f144680cc21b4bbbdeba97d1a5f32ee8a2eae7037ccbdeff8a3c1ce.
+# The flagged text is minified parser code: Sn.MismatchedTokenException=Sn.isRecognitionException=void
+[[allowlists]]
+description = "Minified code in the vendored Yarn release"
+condition = "AND"
+targetRules = ["generic-api-key"]
+paths = ['''^\.yarn/releases/yarn-3\.2\.3\.cjs$''']
+regexes = ['''^Sn\.isRecognitionException=void$''']
+
+# The demo Alchemy key that upstream scaffold-hbar publishes in packages/foundry/.env.example. It
+# came in with this repository's first commit and left with packages/foundry in 9881332, so only
+# this template's own history holds it; a project scaffolded from the template never does.
+[[allowlists]]
+description = "Upstream's public demo Alchemy key in the imported baseline commit"
+condition = "AND"
+targetRules = ["generic-api-key"]
+commits = ["f96ab843f99c42e6a6f21e8c1cbfae419b4f893e"]
+paths = ['''^packages/foundry/\.env\.example$''']
