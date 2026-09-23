@@ -44,7 +44,12 @@ export const RolePanel = ({ sale, roles }: { sale: Sale; roles: Roles }) => {
       <div className="card-body gap-3">
         <h2 className="card-title text-base m-0">This wallet</h2>
         <p className="m-0 text-sm opacity-70">
-          {roles.account ? `Account ${roles.account.account}` : "No Hedera account yet"}, {shortHex(roles.address)}
+          {roles.account === undefined
+            ? "Looking up the account"
+            : roles.account
+              ? `Account ${roles.account.account}`
+              : "No Hedera account yet"}
+          , {shortHex(roles.address)}
         </p>
         <ul className="m-0 p-0 list-none flex flex-col gap-2">
           <Role granted={roles.holdsKycKey} name="Compliance" text={approvals} />
