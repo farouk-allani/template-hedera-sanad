@@ -114,6 +114,15 @@ are not the sale at all:
    the buyer, and the unused HBAR goes back. The network checks the token's rules during the second
    of those. If it refuses, the first is undone with it.
 
+In the app, `/buy` walks a buyer through the three steps in that order and shows where they stand.
+Association needs no Hedera SDK and no special wallet: every HTS token answers `associate()` at its
+own address ([HIP-719](https://hips.hedera.com/hip/hip-719)), so any EVM wallet can send it. The
+page quotes live from the pool, sets the maximum spend to the quote plus a tolerance the buyer picks
+(0.5, 1 or 3 per cent), and sets the deadline two minutes after Buy is pressed; the contract enforces
+both. Before asking the wallet to sign, it simulates the purchase as the buyer. Every refusal the
+network would make, whether not approved, frozen, paused or the price moved past the maximum, shows
+up in that simulation, so the page explains it before anything is paid.
+
 ## What is guaranteed, and by whom
 
 The distinction matters, because only one of these two lists survives a bug in the frontend.

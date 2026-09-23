@@ -83,31 +83,39 @@ local test can prove the behaviour Sanad is built around. Those live in the test
 
 ## Frontend contract interaction
 
-Use the hooks in `packages/nextjs/hooks/scaffold-hbar` (legacy path segment; the branding is
-Scaffold-HBAR / `sh`). The names are `useScaffoldReadContract` and `useScaffoldWriteContract`, not
-`useScaffoldContractRead` / `useScaffoldContractWrite`.
+Use the hooks in `packages/nextjs/hooks/scaffold-hbar` for the sale contract. The names are
+`useScaffoldReadContract` and `useScaffoldWriteContract`, not `useScaffoldContractRead` /
+`useScaffoldContractWrite`.
 
 ```typescript
-const { data } = useScaffoldReadContract({
-  contractName: "YourContract",
-  functionName: "someView",
-  args: [address],
+const { data: quote } = useScaffoldReadContract({
+  contractName: "SanadSale",
+  functionName: "quote",
+  args: [units],
 });
 
-const { writeContractAsync } = useScaffoldWriteContract({ contractName: "YourContract" });
-await writeContractAsync({ functionName: "doThing", args: [x], value: parseEther("0.01") });
+// Simulate as the buyer first: the network's refusals show up here, before anything is signed.
+await publicClient.simulateContract({ address, abi, functionName: "buy", args, value, account: buyer });
+
+const { writeContractAsync } = useScaffoldWriteContract({ contractName: "SanadSale", disableSimulate: true });
+await writeContractAsync({ functionName: "buy", args: [units, deadline], value });
 ```
 
-Also available: `useScaffoldWatchContractEvent`, `useScaffoldEventHistory`,
-`useDeployedContractInfo`, `useScaffoldContract`, `useTransactor`.
+`quote` returns tinybars and a wallet sends weibars, so every HBAR value attached to a transaction
+is tinybars × 10^10 (`WEIBARS_PER_TINYBAR` in `packages/nextjs/utils/sanad/format.ts`).
+
+Token state (KYC, freeze, pause, associations, key custody) comes from the Hedera mirror node
+through `packages/nextjs/hooks/sanad/useMirror.ts`, not from contract reads.
+`packages/nextjs/hooks/sanad/useSale.ts` combines the contract's fixed terms with that state.
 
 Contract data comes from two files in `packages/nextjs/contracts/`: `deployedContracts.ts`
 (generated) and `externalContracts.ts` (hand-written, for contracts we do not deploy).
 
 ## UI components
 
-Use `@scaffold-hbar-ui/components` for web3 UI: `Address`, `AddressInput`, `Balance`, `EtherInput`,
-`IntegerInput`.
+`@scaffold-hbar-ui/components` provides `Address`, `Balance`, `HederaAddress`, `HederaAddressInput`,
+`HbarInput`, `BaseInput` and `HederaPortalFaucet`. The components Sanad's screens share are in
+`packages/nextjs/components/sanad/`.
 
 ## Styling
 
