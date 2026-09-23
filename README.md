@@ -10,10 +10,10 @@ in which the buyer has paid and not been served.
 
 _Sanad_ (سند) is Arabic for a deed or title: the document that says a thing is yours.
 
-> **Status.** Built in the open for the Hedera Scaffold-HBAR Template Bounty. Today this repository
-> scaffolds, installs, lints, builds and boots as a clean Hardhat and Next.js baseline. The sale
-> contract, the screens and the testnet evidence arrive next, and each section below is filled in
-> as its piece lands.
+> **Status.** Built in the open for the Hedera Scaffold-HBAR Template Bounty. The sale contract, its
+> testnet acceptance suite and the app's screens are in place and run against a live testnet
+> deployment. Three sections are still short and are being written next: environment variables,
+> customising it for your asset, and troubleshooting.
 
 ## Who this is for
 
@@ -52,7 +52,11 @@ variables it documents.
 
 - **packages/hardhat** — `SanadSale.sol`, the interfaces it needs, a mock router for local tests,
   and the scripts that build and exercise a demo on testnet.
-- **packages/nextjs** — the app. Arrives in the next milestone.
+- **packages/nextjs** — the app: `/buy` for buyers, `/issuer` for the issuer's two authorities,
+  `/activity` for the record, and upstream's `/debug` for calling the contract directly. The
+  contract supplies the sale's fixed terms and the live quote. Everything the token itself decides
+  (who is approved or frozen, whether it is paused, who holds which key, who has associated) is read
+  from the Hedera mirror node, the only place it can be read.
 
 `SanadSale` holds the inventory and knows five things, all fixed at construction: the router, the
 asset, the settlement token, where the issuer is paid, and the price per unit. It has no admin
@@ -193,8 +197,41 @@ the README will say so plainly rather than sell you the detour.
 
 ## Hedera traps this template handles
 
-Hedera's EVM differs from Ethereum's in ways that cost real money to discover. The list of the ones
-this template already deals with, each with the evidence, lands with the code that handles them.
+Hedera's EVM differs from Ethereum's in ways that cost real money to discover. Each of these was hit
+or checked while building Sanad, and each is handled in the code.
+
+- **The Hedera Token Service reports a refusal as a return value, not a revert.** A contract that
+  ignores the code keeps the buyer's HBAR and delivers nothing. `SanadSale` checks every code and
+  reverts with it, as `DeliveryFailed(code)`.
+- **A KYC change sent from the wrong wallet "succeeds".** `grantTokenKyc` sent to `0x167` by a wallet
+  without the KYC key gives a successful transaction that returned 7, `INVALID_SIGNATURE`, and a
+  simulation reports success too (see the evidence table). The console checks the wallet's key
+  before offering an approval and confirms every change on the mirror node.
+- **KYC can only be granted to an associated account.** So association comes first even for an
+  account with unlimited automatic associations, which only associates when a token arrives.
+- **An unassociated buyer is refused with 176, not 184,** when the account allows unlimited automatic
+  associations, the default for accounts created by sending HBAR to an EVM address
+  ([HIP-904](https://hips.hedera.com/hip/hip-904)). The app reads association from the mirror node
+  instead of inferring it from the error code.
+- **An account with an ECDSA alias must be addressed by its alias.** HTS refuses its long-zero
+  address with `INVALID_ALIAS_KEY` (282). The issuer's treasury and every KYC call use the alias.
+- **HBAR has two decimal systems.** Inside a contract, `msg.value` and balances are tinybars (8
+  decimals); wallets and the JSON-RPC relay use weibars (18). Some Hedera documentation pages say a
+  contract sees 18; the purchases in the evidence table settle to the tinybar with 8. The app
+  converts in one place, `WEIBARS_PER_TINYBAR`.
+- **SaucerSwap has two WHBAR addresses.** `WHBAR()` is the wrapper contract and `whbar()` the HTS
+  token. A swap path must start with the token, or the router reverts with `INVALID_PATH`.
+- **The router refunds its caller, not the buyer.** In an exact-output swap made by a contract, the
+  unused HBAR comes back to the contract, so `SanadSale` forwards it in the same transaction.
+- **`receive()` does not run for native HBAR transfers,** so a contract's balance can change without
+  its code running. `sweepHbar` exists for HBAR that arrives that way.
+- **The mirror node trails consensus by a few seconds.** A read straight after a transaction can be
+  stale, so the app waits for the mirror node to show a change before reporting it.
+- **A contract wiped by a testnet reset looked deployed.** The scaffold's contract check compared
+  `getCode()` with `"0x"`, but viem returns `undefined` for an address without code, so every screen
+  waited forever. Fixed here; the app now says there is no sale at that address.
+- **Creating a SaucerSwap pool takes about 6.8 million gas.** Below that, `addLiquidityETHNewPool`
+  fails inside an association. Setup gives it 9 million.
 
 ## Customising it for your asset
 

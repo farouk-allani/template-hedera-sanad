@@ -1,142 +1,99 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { HederaPortalFaucet } from "@scaffold-hbar-ui/components";
 import type { NextPage } from "next";
-import { useAccount } from "wagmi";
-import { BugAntIcon } from "@heroicons/react/24/outline";
-import { HederaAddress } from "~~/components/scaffold-hbar";
-import { useTargetNetwork } from "~~/hooks/scaffold-hbar";
+import { BuildingLibraryIcon, ClockIcon, ShoppingCartIcon } from "@heroicons/react/24/outline";
+import { SaleGate } from "~~/components/sanad/SaleGate";
+import { SaleTerms } from "~~/components/sanad/SaleTerms";
 
-const Home: NextPage = () => {
-  const { address: connectedAddress, status } = useAccount();
-  const { targetNetwork } = useTargetNetwork();
+const ROLES = [
+  {
+    href: "/buy",
+    title: "Buy",
+    text: "Associate, get approved, and buy with HBAR.",
+    icon: ShoppingCartIcon,
+  },
+  {
+    href: "/issuer",
+    title: "Issuer console",
+    text: "Approve buyers, take inventory back, see who controls the asset.",
+    icon: BuildingLibraryIcon,
+  },
+  {
+    href: "/activity",
+    title: "Activity",
+    text: "Every purchase and withdrawal, and where each buyer stands.",
+    icon: ClockIcon,
+  },
+];
 
-  const isReconnecting = status === "reconnecting" || status === "connecting";
-  const isConnected = status === "connected" && connectedAddress;
-
-  return (
-    <>
-      <div className="flex items-center flex-col grow">
-        <div className="hedera-gradient dark:bg-none dark:bg-hedera-charcoal w-full py-16 px-5">
-          <div className="flex flex-col items-center max-w-2xl mx-auto">
-            <Image
-              src="/Hedera-Icon-White.svg"
-              alt="Hedera icon"
-              width={80}
-              height={80}
-              className="mb-6 hidden dark:block"
-            />
-            <Image src="/Hedera-Icon-Dark.svg" alt="Hedera icon" width={80} height={80} className="mb-6 dark:hidden" />
-            <div className="flex flex-col items-center gap-1 mb-4">
-              <span className="block text-lg font-medium tracking-widest uppercase text-white/80 dark:text-white/60">
-                Built on Hedera
-              </span>
-              <span className="block text-lg font-medium tracking-widest uppercase text-white/80 dark:text-white/60">
-                For
-              </span>
-              <Image
-                src="/Hedera-Wordmark-Lockup-White.svg"
-                alt="Hedera"
-                width={240}
-                height={48}
-                className="mt-1 hidden dark:block"
-              />
-              <Image
-                src="/Hedera-Wordmark-Lockup-Dark.svg"
-                alt="Hedera"
-                width={240}
-                height={48}
-                className="mt-1 dark:hidden"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="w-full max-w-4xl mx-auto px-5 -mt-8">
-          <div className="bg-base-100 rounded-2xl shadow-lg p-8">
-            {isReconnecting ? (
-              <div className="flex flex-col items-center gap-2">
-                <p className="font-semibold text-sm text-base-content/60 uppercase tracking-wider m-0">Connecting…</p>
-                <div className="h-8 w-48 rounded bg-base-200 animate-pulse" aria-hidden />
-              </div>
-            ) : isConnected ? (
-              <div className="flex flex-col items-center gap-2">
-                <p className="font-semibold text-sm text-base-content/60 uppercase tracking-wider m-0">
-                  Connected Address
-                </p>
-                <HederaAddress address={connectedAddress} chain={targetNetwork} />
-              </div>
-            ) : (
-              <div className="flex flex-col items-center gap-2">
-                <p className="font-semibold text-sm text-base-content/60 uppercase tracking-wider m-0">
-                  Connect your wallet to get started
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="w-full max-w-4xl mx-auto px-5 mt-8 pb-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-base-100 rounded-2xl shadow-md p-8 text-center flex flex-col items-center hover:shadow-lg transition-shadow border border-base-300">
-              <div className="w-14 h-14 rounded-full hedera-gradient flex items-center justify-center mb-4">
-                <BugAntIcon className="h-7 w-7 text-white" />
-              </div>
-              <h3 className="font-bold text-lg mb-2">Debug Contracts</h3>
-              <p className="text-base-content/70 text-sm m-0 mb-6">
-                Tinker with your smart contracts and test interactions in real time.
-              </p>
-              <Link href="/debug" passHref className="btn btn-primary btn-sm">
-                Open Debug
-              </Link>
-            </div>
-          </div>
-
-          <div className="mt-8 bg-base-100 rounded-2xl shadow-md p-8 border border-base-300">
-            <h3 className="font-bold text-lg mb-4 text-center">Quick Start</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div className="flex items-start gap-3">
-                <span className="font-bold text-primary text-lg leading-none mt-0.5">1</span>
-                <div>
-                  <p className="m-0 font-medium">Edit the frontend</p>
-                  <code className="text-xs bg-base-200 px-2 py-1 rounded">packages/nextjs/app/page.tsx</code>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <span className="font-bold text-primary text-lg leading-none mt-0.5">2</span>
-                <div>
-                  <p className="m-0 font-medium">Edit your contract</p>
-                  <code className="text-xs bg-base-200 px-2 py-1 rounded">
-                    packages/hardhat/contracts/YourContract.sol
-                  </code>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <span className="font-bold text-primary text-lg leading-none mt-0.5">3</span>
-                <div>
-                  <p className="m-0 font-medium">Get testnet HBAR</p>
-                  <HederaPortalFaucet variant="link" label="portal.hedera.com/faucet" showIcon={false} />
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <span className="font-bold text-primary text-lg leading-none mt-0.5">4</span>
-                <div>
-                  <p className="m-0 font-medium">Deploy to Hedera</p>
-                  <div className="flex flex-col gap-1">
-                    <code className="text-xs bg-base-200 px-2 py-1 rounded">
-                      yarn hardhat:deploy --network hederaTestnet
-                    </code>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+const Home: NextPage = () => (
+  <div className="flex flex-col grow">
+    <div className="hedera-gradient dark:bg-none dark:bg-hedera-charcoal w-full py-14 px-5">
+      <div className="max-w-3xl mx-auto flex flex-col gap-3 text-white">
+        <p className="m-0 text-sm font-medium tracking-widest uppercase text-white/70">Built on Hedera</p>
+        <h1 className="m-0 text-4xl font-bold">Sanad</h1>
+        <p className="m-0 text-lg text-white/90">
+          Sell a permissioned asset for HBAR, in one transaction. The buyer pays HBAR, SaucerSwap converts exactly
+          enough of it to pay the issuer in their settlement token, and the asset is delivered only if the token&apos;s
+          own KYC, freeze and pause rules allow it.
+        </p>
       </div>
-    </>
-  );
-};
+    </div>
+
+    <div className="w-full max-w-5xl mx-auto px-5 py-10 flex flex-col gap-8">
+      <div className="grid gap-6 md:grid-cols-3">
+        {ROLES.map(({ href, title, text, icon: Icon }) => (
+          <Link
+            key={href}
+            href={href}
+            className="card bg-base-100 border border-base-300 hover:border-primary transition-colors"
+          >
+            <div className="card-body gap-2">
+              <Icon className="h-7 w-7 text-primary" aria-hidden />
+              <h2 className="card-title text-lg m-0">{title}</h2>
+              <p className="m-0 text-sm opacity-70">{text}</p>
+            </div>
+          </Link>
+        ))}
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-[1fr_20rem] items-start">
+        <section className="card bg-base-100 border border-base-300">
+          <div className="card-body gap-4">
+            <h2 className="card-title text-base m-0">How one purchase works</h2>
+            <ol className="m-0 pl-5 list-decimal flex flex-col gap-2 text-sm">
+              <li>
+                <span className="font-semibold">Associate.</span> The buyer&apos;s account opts in to holding the asset.
+                Hedera requires this before any account can hold a token.
+              </li>
+              <li>
+                <span className="font-semibold">Approve.</span> The issuer grants the account KYC, signed with the
+                asset&apos;s KYC key. Deciding whom to approve happens outside the ledger.
+              </li>
+              <li>
+                <span className="font-semibold">Buy.</span> In one transaction, SaucerSwap turns the buyer&apos;s HBAR
+                into exactly the settlement owed, pays the issuer, and the sale delivers the asset. Unused HBAR goes
+                back.
+              </li>
+            </ol>
+            <p className="m-0 text-sm">
+              The Hedera Token Service applies the asset&apos;s rules at the moment of delivery. If it refuses, because
+              the buyer is not approved, is frozen, or the asset is paused, the swap and the payment are undone with it.
+              A buyer never pays without being served, however the contract is called.
+            </p>
+          </div>
+        </section>
+
+        <SaleGate>{sale => <SaleTerms sale={sale} />}</SaleGate>
+      </div>
+
+      <p className="m-0 text-xs opacity-60">
+        A template running on Hedera testnet. The asset and the settlement token are demo tokens created for it, and
+        approving an account here verifies nobody&apos;s identity.
+      </p>
+    </div>
+  </div>
+);
 
 export default Home;

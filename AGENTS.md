@@ -50,7 +50,15 @@ someone's money, so do not "simplify" any of them without being asked.
 - Deploy scripts: `packages/hardhat/deploy/` (hardhat-deploy; `snake_case` filenames)
 - Tests: `packages/hardhat/test/`
 - Hardhat config and networks: `packages/hardhat/hardhat.config.ts`
-- Frontend config and networks: `packages/nextjs/scaffold.config.ts`
+- Frontend config and networks: `packages/nextjs/scaffold.config.ts` (Hedera testnet only; the sale
+  cannot be deployed to a local node, because its constructor reads a live SaucerSwap router)
+- Screens: `packages/nextjs/app/buy/`, `app/issuer/` and `app/activity/`; the home page is
+  `app/page.tsx`. Components they share are in `packages/nextjs/components/sanad/`.
+- Frontend logic: `packages/nextjs/hooks/sanad/` (the sale, mirror node queries, the connected
+  wallet's roles, HTS calls) and `packages/nextjs/utils/sanad/` (mirror client, HTS constants,
+  formatting, error messages)
+- What users are told when something fails: `packages/nextjs/utils/sanad/errors.ts`. A new contract
+  error needs an entry there, saying what happened and what to do next.
 - After a deploy, ABIs are generated into `packages/nextjs/contracts/deployedContracts.ts`; never
   edit that by hand. `yarn sanad:setup` regenerates it too.
 - `packages/hardhat/deployments/hederaTestnet/SanadSale.json` is committed deliberately. The
