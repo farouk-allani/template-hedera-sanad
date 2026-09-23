@@ -124,6 +124,12 @@ await writeContractAsync({ functionName: "buy", args: [units, deadline], value }
 `quote` returns tinybars and a wallet sends weibars, so every HBAR value attached to a transaction
 is tinybars × 10^10 (`WEIBARS_PER_TINYBAR` in `packages/nextjs/utils/sanad/format.ts`).
 
+Pass every address a contract read returns through viem's `getAddress()` before using it.
+`packages/nextjs/types/abitype/abi.d.ts` registers addresses as plain strings, and whether that
+registration applies depends on how the package manager lays out `node_modules`: the same read is
+typed `string` under npm and `` `0x${string}` `` under Yarn, so code that type-checks with one fails
+with the other. `useSale.ts` does this for the sale's addresses.
+
 Token state (KYC, freeze, pause, associations, key custody) comes from the Hedera mirror node
 through `packages/nextjs/hooks/sanad/useMirror.ts`, not from contract reads.
 `packages/nextjs/hooks/sanad/useSale.ts` combines the contract's fixed terms with that state.
