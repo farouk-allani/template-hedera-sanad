@@ -1,0 +1,674 @@
+{
+  "address": "0xa62c2fa7Bf14c443Ac1Ec6D509a617cb27ccFE87",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "router_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "asset_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "settlementToken_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "issuerTreasury_",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "pricePerUnit_",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "int64",
+          "name": "responseCode",
+          "type": "int64"
+        }
+      ],
+      "name": "AssociationFailed",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "int64",
+          "name": "responseCode",
+          "type": "int64"
+        }
+      ],
+      "name": "DeliveryFailed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidAmount",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotOwner",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NothingToSweep",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "deadline",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "blockTimestamp",
+          "type": "uint256"
+        }
+      ],
+      "name": "QuoteExpired",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Reentrancy",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "RefundFailed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "SweepFailed",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "UnexpectedHbarSender",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "int64",
+          "name": "responseCode",
+          "type": "int64"
+        }
+      ],
+      "name": "WithdrawalFailed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ZeroAddress",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        }
+      ],
+      "name": "AssetAssociated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "HbarSwept",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "int64",
+          "name": "units",
+          "type": "int64"
+        }
+      ],
+      "name": "InventoryWithdrawn",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "buyer",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "int64",
+          "name": "units",
+          "type": "int64"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "settlementPaid",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "hbarSpent",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "hbarRefunded",
+          "type": "uint256"
+        }
+      ],
+      "name": "Purchased",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "HTS",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "SUCCESS",
+      "outputs": [
+        {
+          "internalType": "int64",
+          "name": "",
+          "type": "int64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "asset",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "associateAsset",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "int64",
+          "name": "units",
+          "type": "int64"
+        },
+        {
+          "internalType": "uint256",
+          "name": "deadline",
+          "type": "uint256"
+        }
+      ],
+      "name": "buy",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "hbarSpent",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "issuerTreasury",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "pricePerUnit",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "int64",
+          "name": "units",
+          "type": "int64"
+        }
+      ],
+      "name": "quote",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "hbarRequired",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "settlementAmount",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "router",
+      "outputs": [
+        {
+          "internalType": "contract ISaucerSwapV1Router",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "settlementToken",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        }
+      ],
+      "name": "sweepHbar",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "whbarToken",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "int64",
+          "name": "units",
+          "type": "int64"
+        }
+      ],
+      "name": "withdrawInventory",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "stateMutability": "payable",
+      "type": "receive"
+    }
+  ],
+  "transactionHash": "0xdd64ac6feebec9a231f1a18212fbab58c0c4e2cf8528f09f7b1e157c45c4fcef",
+  "receipt": {
+    "to": null,
+    "from": "0x2D749a5AeC280AEBeBffD0aaff5C22467a7d9971",
+    "contractAddress": "0xa62c2fa7Bf14c443Ac1Ec6D509a617cb27ccFE87",
+    "transactionIndex": 1,
+    "gasUsed": "962104",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x579ad7d03691b88be457b7529f45e54744da4c0a48188c153bbc536450165efb",
+    "transactionHash": "0xdd64ac6feebec9a231f1a18212fbab58c0c4e2cf8528f09f7b1e157c45c4fcef",
+    "logs": [],
+    "blockNumber": 40846129,
+    "cumulativeGasUsed": "1091201",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    "0x0000000000000000000000000000000000004b40",
+    "0x0000000000000000000000000000000000a2c65e",
+    "0x0000000000000000000000000000000000a2c65d",
+    "0x2d749a5aec280aebebffd0aaff5c22467a7d9971",
+    "10000000"
+  ],
+  "numDeployments": 1,
+  "solcInputHash": "10a300138daf7aba153aa9cb17772628",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.28+commit.7893614a\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"router_\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"asset_\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"settlementToken_\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"issuerTreasury_\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"pricePerUnit_\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[{\"internalType\":\"int64\",\"name\":\"responseCode\",\"type\":\"int64\"}],\"name\":\"AssociationFailed\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"int64\",\"name\":\"responseCode\",\"type\":\"int64\"}],\"name\":\"DeliveryFailed\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidAmount\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotOwner\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NothingToSweep\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"deadline\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"blockTimestamp\",\"type\":\"uint256\"}],\"name\":\"QuoteExpired\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"Reentrancy\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"RefundFailed\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"SweepFailed\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"UnexpectedHbarSender\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"int64\",\"name\":\"responseCode\",\"type\":\"int64\"}],\"name\":\"WithdrawalFailed\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ZeroAddress\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"asset\",\"type\":\"address\"}],\"name\":\"AssetAssociated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"HbarSwept\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"int64\",\"name\":\"units\",\"type\":\"int64\"}],\"name\":\"InventoryWithdrawn\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"buyer\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"int64\",\"name\":\"units\",\"type\":\"int64\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"settlementPaid\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"hbarSpent\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"hbarRefunded\",\"type\":\"uint256\"}],\"name\":\"Purchased\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"HTS\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"SUCCESS\",\"outputs\":[{\"internalType\":\"int64\",\"name\":\"\",\"type\":\"int64\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"asset\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"associateAsset\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"int64\",\"name\":\"units\",\"type\":\"int64\"},{\"internalType\":\"uint256\",\"name\":\"deadline\",\"type\":\"uint256\"}],\"name\":\"buy\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"hbarSpent\",\"type\":\"uint256\"}],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"issuerTreasury\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pricePerUnit\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"int64\",\"name\":\"units\",\"type\":\"int64\"}],\"name\":\"quote\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"hbarRequired\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"settlementAmount\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"router\",\"outputs\":[{\"internalType\":\"contract ISaucerSwapV1Router\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"settlementToken\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"}],\"name\":\"sweepHbar\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"whbarToken\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"int64\",\"name\":\"units\",\"type\":\"int64\"}],\"name\":\"withdrawInventory\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"stateMutability\":\"payable\",\"type\":\"receive\"}],\"devdoc\":{\"details\":\"Inside a Hedera contract, HBAR amounts (`msg.value`, balances) are tinybars, 8 decimals.      Clients send weibars, 18 decimals, and the JSON-RPC relay converts between them.      This contract deliberately does **not** check KYC, freeze or pause status. Those rules      belong to the token and the network applies them during step 2. Checking here as well      would fail earlier but is not the guarantee, and it invites the belief that the network's      check is redundant. A frontend may pre-check to show a friendlier message.\",\"events\":{\"HbarSwept(address,uint256)\":{\"params\":{\"amount\":\"Tinybars moved.\",\"to\":\"The recipient.\"}},\"InventoryWithdrawn(address,int64)\":{\"params\":{\"to\":\"The recipient.\",\"units\":\"Asset units moved.\"}},\"Purchased(address,int64,uint256,uint256,uint256)\":{\"params\":{\"buyer\":\"The account that paid and received the asset.\",\"hbarRefunded\":\"Tinybars returned to the buyer.\",\"hbarSpent\":\"Tinybars the swap consumed.\",\"settlementPaid\":\"Settlement-token base units paid to the issuer.\",\"units\":\"Asset units delivered.\"}}},\"kind\":\"dev\",\"methods\":{\"associateAsset()\":{\"details\":\"The issuer must also grant this contract KYC before sending it inventory, otherwise      the inventory transfer itself is refused with 176.\"},\"buy(int64,uint256)\":{\"details\":\"`msg.value` is the buyer's maximum spend, not the price: the router takes what the      trade costs and the rest comes back.\",\"params\":{\"deadline\":\"Unix timestamp after which the quote is no longer honoured.\",\"units\":\"Asset units to buy.\"},\"returns\":{\"hbarSpent\":\"Tinybars the swap actually consumed.\"}},\"constructor\":{\"params\":{\"asset_\":\"The permissioned HTS asset to sell.\",\"issuerTreasury_\":\"Settlement recipient; the `evm_address` for an aliased account.\",\"pricePerUnit_\":\"Settlement base units per asset unit.\",\"router_\":\"SaucerSwap V1 router.\",\"settlementToken_\":\"The token the issuer is paid in.\"}},\"quote(int64)\":{\"details\":\"A quote is only good for the reserves it was read at. `buy` re-prices at execution and      is bounded by `msg.value`, so a stale quote costs the buyer nothing beyond fees.\",\"params\":{\"units\":\"Asset units to price.\"},\"returns\":{\"hbarRequired\":\"Tinybars needed at current reserves.\",\"settlementAmount\":\"Settlement base units the issuer would receive.\"}},\"sweepHbar(address)\":{\"details\":\"A completed purchase leaves no HBAR behind, but Hedera does not run `receive()` on a      native CryptoTransfer, so HBAR can still arrive without passing the guard below.      Without this it would be stranded.\",\"params\":{\"to\":\"The recipient.\"}},\"withdrawInventory(address,int64)\":{\"details\":\"Without this the asset is stranded in an abandoned sale. The recipient must be      associated with the asset and hold KYC, or the network refuses with 184 or 176.\",\"params\":{\"to\":\"The recipient.\",\"units\":\"Asset units to move.\"}}},\"title\":\"SanadSale\",\"version\":1},\"userdoc\":{\"errors\":{\"AssociationFailed(int64)\":[{\"notice\":\"The contract could not associate itself with the asset.\"}],\"DeliveryFailed(int64)\":[{\"notice\":\"The network refused to deliver the asset, so the whole purchase is reverted.         176 KYC not granted, 165 account frozen, 184 not associated, 265 token paused.\"}],\"InvalidAmount()\":[{\"notice\":\"Units must be positive; the price must not be zero.\"}],\"NotOwner()\":[{\"notice\":\"Caller is not the issuer operations account.\"}],\"NothingToSweep()\":[{\"notice\":\"There is no HBAR to recover.\"}],\"QuoteExpired(uint256,uint256)\":[{\"notice\":\"The quote was no longer valid when the transaction reached consensus.\"}],\"Reentrancy()\":[{\"notice\":\"A nested call into a guarded function.\"}],\"RefundFailed()\":[{\"notice\":\"Forwarding HBAR to the buyer failed, so the purchase is reverted.\"}],\"SweepFailed()\":[{\"notice\":\"Sending HBAR to the recipient failed.\"}],\"UnexpectedHbarSender(address)\":[{\"notice\":\"Only the router's refund may reach `receive()`.\"}],\"WithdrawalFailed(int64)\":[{\"notice\":\"The network refused to move inventory out.\"}],\"ZeroAddress()\":[{\"notice\":\"A required address was zero.\"}]},\"events\":{\"AssetAssociated(address)\":{\"notice\":\"The contract associated itself with the asset so it can hold inventory.\"},\"HbarSwept(address,uint256)\":{\"notice\":\"HBAR that arrived outside a purchase was recovered.\"},\"InventoryWithdrawn(address,int64)\":{\"notice\":\"Unsold inventory left the contract.\"},\"Purchased(address,int64,uint256,uint256,uint256)\":{\"notice\":\"A completed purchase.\"}},\"kind\":\"user\",\"methods\":{\"HTS()\":{\"notice\":\"The Hedera Token Service system contract.\"},\"SUCCESS()\":{\"notice\":\"HTS response code for success.\"},\"asset()\":{\"notice\":\"The permissioned asset being sold.\"},\"associateAsset()\":{\"notice\":\"Associates this contract with the asset so it can hold sale inventory.\"},\"buy(int64,uint256)\":{\"notice\":\"Buys `units` of the asset, paying in HBAR.\"},\"issuerTreasury()\":{\"notice\":\"Where settlement lands. For an ECDSA account this must be its `evm_address`: HTS refuses transfers to the long-zero address of an aliased account with INVALID_ALIAS_KEY (282).\"},\"owner()\":{\"notice\":\"The issuer operations account. Set once, at construction, and never transferable.\"},\"pricePerUnit()\":{\"notice\":\"Settlement-token base units charged per one asset unit.\"},\"quote(int64)\":{\"notice\":\"The HBAR the pool currently requires for `units`, and the settlement it produces.\"},\"router()\":{\"notice\":\"The SaucerSwap V1 router used for the HBAR to settlement-token leg.\"},\"settlementToken()\":{\"notice\":\"The token the issuer is paid in.\"},\"sweepHbar(address)\":{\"notice\":\"Recovers HBAR held by this contract.\"},\"whbarToken()\":{\"notice\":\"The WHBAR **token**, read from the router at construction. Swap paths start here.\"},\"withdrawInventory(address,int64)\":{\"notice\":\"Moves unsold inventory out of the contract.\"}},\"notice\":\"Sells units of a permissioned HTS asset for HBAR, in one transaction:         1. SaucerSwap V1 converts the buyer's HBAR into exactly the settlement amount and pays            the issuer's treasury directly.         2. This contract delivers the asset from its own inventory.         3. The router's refund of unused HBAR is forwarded to the buyer.         If step 2 is refused, step 1 is undone with it. There is no state in which the buyer         has paid and not been served.\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/SanadSale.sol\":\"SanadSale\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"contracts/SanadSale.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.28;\\n\\nimport { ISaucerSwapV1Router } from \\\"./interfaces/ISaucerSwapV1Router.sol\\\";\\nimport { IHederaTokenService } from \\\"./interfaces/IHederaTokenService.sol\\\";\\n\\n/// @title SanadSale\\n/// @notice Sells units of a permissioned HTS asset for HBAR, in one transaction:\\n///         1. SaucerSwap V1 converts the buyer's HBAR into exactly the settlement amount and pays\\n///            the issuer's treasury directly.\\n///         2. This contract delivers the asset from its own inventory.\\n///         3. The router's refund of unused HBAR is forwarded to the buyer.\\n///         If step 2 is refused, step 1 is undone with it. There is no state in which the buyer\\n///         has paid and not been served.\\n/// @dev Inside a Hedera contract, HBAR amounts (`msg.value`, balances) are tinybars, 8 decimals.\\n///      Clients send weibars, 18 decimals, and the JSON-RPC relay converts between them.\\n///\\n///      This contract deliberately does **not** check KYC, freeze or pause status. Those rules\\n///      belong to the token and the network applies them during step 2. Checking here as well\\n///      would fail earlier but is not the guarantee, and it invites the belief that the network's\\n///      check is redundant. A frontend may pre-check to show a friendlier message.\\ncontract SanadSale {\\n    /// The Hedera Token Service system contract.\\n    address public constant HTS = 0x0000000000000000000000000000000000000167;\\n\\n    /// HTS response code for success.\\n    int64 public constant SUCCESS = 22;\\n\\n    /// The SaucerSwap V1 router used for the HBAR to settlement-token leg.\\n    ISaucerSwapV1Router public immutable router;\\n\\n    /// The WHBAR **token**, read from the router at construction. Swap paths start here.\\n    address public immutable whbarToken;\\n\\n    /// The permissioned asset being sold.\\n    address public immutable asset;\\n\\n    /// The token the issuer is paid in.\\n    address public immutable settlementToken;\\n\\n    /// Where settlement lands. For an ECDSA account this must be its `evm_address`: HTS refuses\\n    /// transfers to the long-zero address of an aliased account with INVALID_ALIAS_KEY (282).\\n    address public immutable issuerTreasury;\\n\\n    /// Settlement-token base units charged per one asset unit.\\n    uint256 public immutable pricePerUnit;\\n\\n    /// The issuer operations account. Set once, at construction, and never transferable.\\n    address public immutable owner;\\n\\n    uint256 private _lock = 1;\\n\\n    /// @notice A completed purchase.\\n    /// @param buyer The account that paid and received the asset.\\n    /// @param units Asset units delivered.\\n    /// @param settlementPaid Settlement-token base units paid to the issuer.\\n    /// @param hbarSpent Tinybars the swap consumed.\\n    /// @param hbarRefunded Tinybars returned to the buyer.\\n    event Purchased(\\n        address indexed buyer,\\n        int64 units,\\n        uint256 settlementPaid,\\n        uint256 hbarSpent,\\n        uint256 hbarRefunded\\n    );\\n\\n    /// @notice The contract associated itself with the asset so it can hold inventory.\\n    event AssetAssociated(address indexed asset);\\n\\n    /// @notice Unsold inventory left the contract.\\n    /// @param to The recipient.\\n    /// @param units Asset units moved.\\n    event InventoryWithdrawn(address indexed to, int64 units);\\n\\n    /// @notice HBAR that arrived outside a purchase was recovered.\\n    /// @param to The recipient.\\n    /// @param amount Tinybars moved.\\n    event HbarSwept(address indexed to, uint256 amount);\\n\\n    /// @notice Caller is not the issuer operations account.\\n    error NotOwner();\\n    /// @notice A nested call into a guarded function.\\n    error Reentrancy();\\n    /// @notice A required address was zero.\\n    error ZeroAddress();\\n    /// @notice Units must be positive; the price must not be zero.\\n    error InvalidAmount();\\n    /// @notice The quote was no longer valid when the transaction reached consensus.\\n    error QuoteExpired(uint256 deadline, uint256 blockTimestamp);\\n    /// @notice The contract could not associate itself with the asset.\\n    error AssociationFailed(int64 responseCode);\\n    /// @notice The network refused to deliver the asset, so the whole purchase is reverted.\\n    ///         176 KYC not granted, 165 account frozen, 184 not associated, 265 token paused.\\n    error DeliveryFailed(int64 responseCode);\\n    /// @notice The network refused to move inventory out.\\n    error WithdrawalFailed(int64 responseCode);\\n    /// @notice Forwarding HBAR to the buyer failed, so the purchase is reverted.\\n    error RefundFailed();\\n    /// @notice Sending HBAR to the recipient failed.\\n    error SweepFailed();\\n    /// @notice There is no HBAR to recover.\\n    error NothingToSweep();\\n    /// @notice Only the router's refund may reach `receive()`.\\n    error UnexpectedHbarSender(address sender);\\n\\n    modifier onlyOwner() {\\n        if (msg.sender != owner) revert NotOwner();\\n        _;\\n    }\\n\\n    modifier nonReentrant() {\\n        if (_lock != 1) revert Reentrancy();\\n        _lock = 2;\\n        _;\\n        _lock = 1;\\n    }\\n\\n    /// @param router_ SaucerSwap V1 router.\\n    /// @param asset_ The permissioned HTS asset to sell.\\n    /// @param settlementToken_ The token the issuer is paid in.\\n    /// @param issuerTreasury_ Settlement recipient; the `evm_address` for an aliased account.\\n    /// @param pricePerUnit_ Settlement base units per asset unit.\\n    constructor(\\n        address router_,\\n        address asset_,\\n        address settlementToken_,\\n        address issuerTreasury_,\\n        uint256 pricePerUnit_\\n    ) {\\n        if (\\n            router_ == address(0) ||\\n            asset_ == address(0) ||\\n            settlementToken_ == address(0) ||\\n            issuerTreasury_ == address(0)\\n        ) {\\n            revert ZeroAddress();\\n        }\\n        if (pricePerUnit_ == 0) revert InvalidAmount();\\n\\n        router = ISaucerSwapV1Router(router_);\\n        whbarToken = ISaucerSwapV1Router(router_).whbar();\\n        asset = asset_;\\n        settlementToken = settlementToken_;\\n        issuerTreasury = issuerTreasury_;\\n        pricePerUnit = pricePerUnit_;\\n        owner = msg.sender;\\n    }\\n\\n    /// @notice Associates this contract with the asset so it can hold sale inventory.\\n    /// @dev The issuer must also grant this contract KYC before sending it inventory, otherwise\\n    ///      the inventory transfer itself is refused with 176.\\n    function associateAsset() external onlyOwner {\\n        int64 responseCode = IHederaTokenService(HTS).associateToken(address(this), asset);\\n        if (responseCode != SUCCESS) revert AssociationFailed(responseCode);\\n        emit AssetAssociated(asset);\\n    }\\n\\n    /// @notice The HBAR the pool currently requires for `units`, and the settlement it produces.\\n    /// @dev A quote is only good for the reserves it was read at. `buy` re-prices at execution and\\n    ///      is bounded by `msg.value`, so a stale quote costs the buyer nothing beyond fees.\\n    /// @param units Asset units to price.\\n    /// @return hbarRequired Tinybars needed at current reserves.\\n    /// @return settlementAmount Settlement base units the issuer would receive.\\n    function quote(int64 units) external view returns (uint256 hbarRequired, uint256 settlementAmount) {\\n        settlementAmount = _settlementFor(units);\\n        hbarRequired = router.getAmountsIn(settlementAmount, _path())[0];\\n    }\\n\\n    /// @notice Buys `units` of the asset, paying in HBAR.\\n    /// @dev `msg.value` is the buyer's maximum spend, not the price: the router takes what the\\n    ///      trade costs and the rest comes back.\\n    /// @param units Asset units to buy.\\n    /// @param deadline Unix timestamp after which the quote is no longer honoured.\\n    /// @return hbarSpent Tinybars the swap actually consumed.\\n    function buy(int64 units, uint256 deadline) external payable nonReentrant returns (uint256 hbarSpent) {\\n        if (block.timestamp > deadline) revert QuoteExpired(deadline, block.timestamp);\\n        uint256 settlementAmount = _settlementFor(units);\\n\\n        // 1. Exact-output swap, paid straight to the issuer. The router reverts with\\n        //    EXCESSIVE_INPUT_AMOUNT if msg.value cannot cover the trade.\\n        uint256[] memory amounts = router.swapETHForExactTokens{ value: msg.value }(\\n            settlementAmount,\\n            _path(),\\n            issuerTreasury,\\n            deadline\\n        );\\n        hbarSpent = amounts[0];\\n\\n        // 2. Delivery. The network applies the token's KYC, freeze and pause rules here and\\n        //    reports refusal in the response code rather than reverting, so this check is what\\n        //    turns a refusal into a full rollback of step 1.\\n        int64 responseCode = IHederaTokenService(HTS).transferToken(asset, address(this), msg.sender, units);\\n        if (responseCode != SUCCESS) revert DeliveryFailed(responseCode);\\n\\n        // 3. The router refunded the unused HBAR to this contract, not to the buyer.\\n        uint256 refund = msg.value - hbarSpent;\\n        if (refund > 0) {\\n            (bool ok, ) = payable(msg.sender).call{ value: refund }(\\\"\\\");\\n            if (!ok) revert RefundFailed();\\n        }\\n\\n        emit Purchased(msg.sender, units, settlementAmount, hbarSpent, refund);\\n    }\\n\\n    /// @notice Moves unsold inventory out of the contract.\\n    /// @dev Without this the asset is stranded in an abandoned sale. The recipient must be\\n    ///      associated with the asset and hold KYC, or the network refuses with 184 or 176.\\n    /// @param to The recipient.\\n    /// @param units Asset units to move.\\n    function withdrawInventory(address to, int64 units) external onlyOwner {\\n        if (to == address(0)) revert ZeroAddress();\\n        if (units <= 0) revert InvalidAmount();\\n\\n        int64 responseCode = IHederaTokenService(HTS).transferToken(asset, address(this), to, units);\\n        if (responseCode != SUCCESS) revert WithdrawalFailed(responseCode);\\n        emit InventoryWithdrawn(to, units);\\n    }\\n\\n    /// @notice Recovers HBAR held by this contract.\\n    /// @dev A completed purchase leaves no HBAR behind, but Hedera does not run `receive()` on a\\n    ///      native CryptoTransfer, so HBAR can still arrive without passing the guard below.\\n    ///      Without this it would be stranded.\\n    /// @param to The recipient.\\n    function sweepHbar(address to) external onlyOwner {\\n        if (to == address(0)) revert ZeroAddress();\\n        uint256 amount = address(this).balance;\\n        if (amount == 0) revert NothingToSweep();\\n\\n        (bool ok, ) = payable(to).call{ value: amount }(\\\"\\\");\\n        if (!ok) revert SweepFailed();\\n        emit HbarSwept(to, amount);\\n    }\\n\\n    /// @dev Only the router's refund is expected here. This guard is not airtight, and is not\\n    ///      relied upon: Hedera credits HBAR by CryptoTransfer without invoking `receive()`, so\\n    ///      `sweepHbar` exists for whatever arrives that way.\\n    receive() external payable {\\n        if (msg.sender != address(router)) revert UnexpectedHbarSender(msg.sender);\\n    }\\n\\n    /// @dev Settlement owed for `units`, rejecting the non-positive values an int64 allows.\\n    function _settlementFor(int64 units) private view returns (uint256) {\\n        if (units <= 0) revert InvalidAmount();\\n        return uint256(uint64(units)) * pricePerUnit;\\n    }\\n\\n    /// @dev The swap path. Starts at the router's WHBAR *token*, never the wrapper contract.\\n    function _path() private view returns (address[] memory path) {\\n        path = new address[](2);\\n        path[0] = whbarToken;\\n        path[1] = settlementToken;\\n    }\\n}\\n\",\"keccak256\":\"0x3e80dfa1eb868cad1309ea89ee929e62d39f63f59e0db50e8dfaae701c826c80\",\"license\":\"MIT\"},\"contracts/interfaces/IHederaTokenService.sol\":{\"content\":\"// SPDX-License-Identifier: Apache-2.0\\npragma solidity ^0.8.0;\\n\\n/// Minimal interface for the HTS precompile at 0x167 (create fungible token + mint).\\n/// Struct layout matches the official IHederaTokenService for ABI compatibility.\\ninterface IHederaTokenService {\\n    struct Expiry {\\n        int64 second;\\n        address autoRenewAccount;\\n        int64 autoRenewPeriod;\\n    }\\n\\n    struct KeyValue {\\n        bool inheritAccountKey;\\n        address contractId;\\n        bytes ed25519;\\n        bytes ECDSA_secp256k1;\\n        address delegatableContractId;\\n    }\\n\\n    struct TokenKey {\\n        uint256 keyType;\\n        KeyValue key;\\n    }\\n\\n    struct HederaToken {\\n        string name;\\n        string symbol;\\n        address treasury;\\n        string memo;\\n        bool tokenSupplyType;\\n        int64 maxSupply;\\n        bool freezeDefault;\\n        TokenKey[] tokenKeys;\\n        Expiry expiry;\\n    }\\n\\n    /// Creates a Fungible Token with the specified properties.\\n    /// @return responseCode SUCCESS is 22.\\n    /// @return tokenAddress The created token's address.\\n    function createFungibleToken(\\n        HederaToken memory token,\\n        int64 initialTotalSupply,\\n        int32 decimals\\n    ) external payable returns (int64 responseCode, address tokenAddress);\\n\\n    /// Mints an amount of the token to the treasury account.\\n    /// @param metadata For NFTs only; use empty array for fungible.\\n    /// @return responseCode SUCCESS is 22.\\n    function mintToken(\\n        address token,\\n        int64 amount,\\n        bytes[] memory metadata\\n    ) external returns (int64 responseCode, int64 newTotalSupply, int64[] memory serialNumbers);\\n\\n    /// Associates an account with a token. An account must be associated with a token before it\\n    /// can hold any balance of it, which is why a contract holding sale inventory associates itself.\\n    /// @param account The account to associate.\\n    /// @param token The token to associate it with.\\n    /// @return responseCode SUCCESS is 22.\\n    function associateToken(address account, address token) external returns (int64 responseCode);\\n\\n    /// Transfers a fungible token between two accounts.\\n    /// The network applies the token's KYC, freeze and pause rules at this point and reports the\\n    /// outcome in the response code. It does **not** revert on refusal, so an unchecked call looks\\n    /// like success: 176 ACCOUNT_KYC_NOT_GRANTED_FOR_TOKEN, 165 ACCOUNT_FROZEN_FOR_TOKEN,\\n    /// 184 TOKEN_NOT_ASSOCIATED_TO_ACCOUNT, 265 TOKEN_IS_PAUSED.\\n    /// @param token The token to move.\\n    /// @param sender The account debited.\\n    /// @param recipient The account credited.\\n    /// @param amount The amount, in the token's smallest unit.\\n    /// @return responseCode SUCCESS is 22.\\n    function transferToken(\\n        address token,\\n        address sender,\\n        address recipient,\\n        int64 amount\\n    ) external returns (int64 responseCode);\\n}\\n\",\"keccak256\":\"0x42f6eac55ee363ebe1552638634dac907930914be90b00b8d7171bc6ec01e6bd\",\"license\":\"Apache-2.0\"},\"contracts/interfaces/ISaucerSwapV1Router.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\n/// The part of SaucerSwap's V1 router (RouterV3) that Sanad uses.\\n/// Verified against saucerswaplabs/saucerswap-periphery @ 606a003, UniswapV2Router02.sol.\\n///\\n/// The router exposes two WHBAR addresses and they are not interchangeable: `WHBAR()` is the\\n/// wrapper *contract*, `whbar()` is the HTS *token*. A swap path must start with `whbar()`, or\\n/// the router reverts with INVALID_PATH.\\ninterface ISaucerSwapV1Router {\\n    /// The factory that created the pairs this router trades against.\\n    function factory() external view returns (address);\\n\\n    /// The WHBAR wrapper contract. This is **not** the address to put in a swap path.\\n    function WHBAR() external view returns (address);\\n\\n    /// The WHBAR HTS token. Swap paths start here.\\n    function whbar() external view returns (address);\\n\\n    /// Spends at most `msg.value` HBAR to deliver exactly `amountOut` of the last token in `path`.\\n    /// Reverts with EXCESSIVE_INPUT_AMOUNT when `msg.value` cannot cover the trade.\\n    /// @dev Unused HBAR is refunded to `msg.sender`, which is the calling contract rather than the\\n    ///      end user. A caller that forgets to pass the refund on simply keeps the buyer's change.\\n    /// @param amountOut The exact amount of the output token to deliver.\\n    /// @param path Token addresses, starting at `whbar()`.\\n    /// @param to The recipient of the output token.\\n    /// @param deadline Unix timestamp after which the router rejects the trade.\\n    /// @return amounts Input and output amounts; `amounts[0]` is the HBAR actually spent, in tinybars.\\n    function swapETHForExactTokens(\\n        uint256 amountOut,\\n        address[] calldata path,\\n        address to,\\n        uint256 deadline\\n    ) external payable returns (uint256[] memory amounts);\\n\\n    /// The input amounts required to receive `amountOut` along `path`, at current reserves.\\n    /// @return amounts `amounts[0]` is the HBAR required, in tinybars.\\n    function getAmountsIn(\\n        uint256 amountOut,\\n        address[] calldata path\\n    ) external view returns (uint256[] memory amounts);\\n}\\n\",\"keccak256\":\"0x60d7a6937546c215694698a39549c5d6d8798846711922581146a70908a5cb78\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x610160604052600160005534801561001657600080fd5b506040516112903803806112908339810160408190526100359161016f565b6001600160a01b038516158061005257506001600160a01b038416155b8061006457506001600160a01b038316155b8061007657506001600160a01b038216155b156100945760405163d92e233d60e01b815260040160405180910390fd5b806000036100b55760405163162908e360e11b815260040160405180910390fd5b6001600160a01b0385166080819052604080516353a6a84360e11b8152905163a74d5086916004808201926020929091908290030181865afa1580156100ff573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061012391906101cd565b6001600160a01b0390811660a05293841660c05291831660e05290911661010052610120525033610140526101ef565b80516001600160a01b038116811461016a57600080fd5b919050565b600080600080600060a0868803121561018757600080fd5b61019086610153565b945061019e60208701610153565b93506101ac60408701610153565b92506101ba60608701610153565b9150608086015190509295509295909350565b6000602082840312156101df57600080fd5b6101e882610153565b9392505050565b60805160a05160c05160e051610100516101205161014051610fe66102aa6000396000818161025f015281816103ba015281816107fe0152610a290152600081816103590152610bef0152600081816101f7015261059b01526000818161022b0152610c9a0152600081816101c301528181610650015281816108590152818161090b0152610ac90152600081816103250152610c4601526000818160f10152818161038d0152818161056201526109650152610fe66000f3fe6080604052600436106100e15760003560e01c80639416fb451161007f578063d0a6d1a611610059578063d0a6d1a6146102eb578063e5d1285514610313578063e66825c314610347578063f887ea401461037b57600080fd5b80639416fb4514610281578063b0ff2aec14610296578063cae44fd6146102cb57600080fd5b806338d52e0f116100bb57806338d52e0f146101b157806365977c4d146101e55780637b9e618d146102195780638da5cb5b1461024d57600080fd5b80630d2737291461013d5780631bc921621461015d5780631d94c9231461019057600080fd5b3661013857336001600160a01b037f00000000000000000000000000000000000000000000000000000000000000001614610136576040516305578a6b60e51b81523360048201526024015b60405180910390fd5b005b600080fd5b34801561014957600080fd5b50610136610158366004610d0b565b6103af565b34801561016957600080fd5b5061017361016781565b6040516001600160a01b0390911681526020015b60405180910390f35b6101a361019e366004610d3f565b6104fe565b604051908152602001610187565b3480156101bd57600080fd5b506101737f000000000000000000000000000000000000000000000000000000000000000081565b3480156101f157600080fd5b506101737f000000000000000000000000000000000000000000000000000000000000000081565b34801561022557600080fd5b506101737f000000000000000000000000000000000000000000000000000000000000000081565b34801561025957600080fd5b506101737f000000000000000000000000000000000000000000000000000000000000000081565b34801561028d57600080fd5b506101366107f3565b3480156102a257600080fd5b506102b66102b1366004610d6b565b610955565b60408051928352602083019190915201610187565b3480156102d757600080fd5b506101366102e6366004610d88565b610a1e565b3480156102f757600080fd5b50610300601681565b60405160079190910b8152602001610187565b34801561031f57600080fd5b506101737f000000000000000000000000000000000000000000000000000000000000000081565b34801561035357600080fd5b506101a37f000000000000000000000000000000000000000000000000000000000000000081565b34801561038757600080fd5b506101737f000000000000000000000000000000000000000000000000000000000000000081565b336001600160a01b037f000000000000000000000000000000000000000000000000000000000000000016146103f8576040516330cd747160e01b815260040160405180910390fd5b6001600160a01b03811661041f5760405163d92e233d60e01b815260040160405180910390fd5b47600081900361044257604051630d44987f60e21b815260040160405180910390fd5b6000826001600160a01b03168260405160006040518083038185875af1925050503d806000811461048f576040519150601f19603f3d011682016040523d82523d6000602084013e610494565b606091505b50509050806104b6576040516313dd85ff60e31b815260040160405180910390fd5b826001600160a01b03167f4243929a48429ffa81882248e5555b68c203635434f32bc7b64d1b3051f83b56836040516104f191815260200190565b60405180910390a2505050565b600080546001146105225760405163558a1e0360e11b815260040160405180910390fd5b600260005542821015610551576040516373c10ec160e11b81526004810183905242602482015260440161012d565b600061055c84610bc5565b905060007f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031663fb3bdb413484610599610c24565b7f0000000000000000000000000000000000000000000000000000000000000000896040518663ffffffff1660e01b81526004016105da9493929190610e04565b60006040518083038185885af11580156105f8573d6000803e3d6000fd5b50505050506040513d6000823e601f3d908101601f191682016040526106219190810190610e4f565b90508060008151811061063657610636610f1c565b602090810291909101015160405163eca3691760e01b81527f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03166004820152306024820152336044820152600787900b60648201529093506000906101679063eca36917906084016020604051808303816000875af11580156106c5573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906106e99190610f32565b9050600781900b6016146107165760405163c0c2ed8960e01b8152600782900b600482015260240161012d565b60006107228534610f65565b9050801561079557604051600090339083908381818185875af1925050503d806000811461076c576040519150601f19603f3d011682016040523d82523d6000602084013e610771565b606091505b505090508061079357604051633c31275160e21b815260040160405180910390fd5b505b60408051600789900b8152602081018690529081018690526060810182905233907fce7c595531f1524f97f7205dee05f28362aa32a4444e5ff39b41219b04df32e29060800160405180910390a25050600160005550909392505050565b336001600160a01b037f0000000000000000000000000000000000000000000000000000000000000000161461083c576040516330cd747160e01b815260040160405180910390fd5b60405163248a35ef60e11b81523060048201526001600160a01b037f0000000000000000000000000000000000000000000000000000000000000000166024820152600090610167906349146bde906044016020604051808303816000875af11580156108ad573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906108d19190610f32565b9050600781900b6016146108fe5760405163e9ca881b60e01b8152600782900b600482015260240161012d565b6040516001600160a01b037f000000000000000000000000000000000000000000000000000000000000000016907f6d45b36f677ece19af8e11dbd485e91a9f8ad532bae15ae5e69a270796692f0990600090a250565b60008061096183610bc5565b90507f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316631f00ca748261099b610c24565b6040518363ffffffff1660e01b81526004016109b8929190610f78565b600060405180830381865afa1580156109d5573d6000803e3d6000fd5b505050506040513d6000823e601f3d908101601f191682016040526109fd9190810190610e4f565b600081518110610a0f57610a0f610f1c565b60200260200101519150915091565b336001600160a01b037f00000000000000000000000000000000000000000000000000000000000000001614610a67576040516330cd747160e01b815260040160405180910390fd5b6001600160a01b038216610a8e5760405163d92e233d60e01b815260040160405180910390fd5b60008160070b13610ab25760405163162908e360e11b815260040160405180910390fd5b60405163eca3691760e01b81526001600160a01b037f00000000000000000000000000000000000000000000000000000000000000008116600483015230602483015283166044820152600782900b60648201526000906101679063eca36917906084016020604051808303816000875af1158015610b35573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610b599190610f32565b9050600781900b601614610b865760405163313a3bf960e21b8152600782900b600482015260240161012d565b604051600783900b81526001600160a01b038416907fd91065cbaea8103e730e2ced6f4973724b8f119d9921e8f0ee0c00895c8366d0906020016104f1565b6000808260070b13610bea5760405163162908e360e11b815260040160405180910390fd5b610c1e7f000000000000000000000000000000000000000000000000000000000000000067ffffffffffffffff8416610f99565b92915050565b60408051600280825260608083018452926020830190803683370190505090507f000000000000000000000000000000000000000000000000000000000000000081600081518110610c7857610c78610f1c565b60200260200101906001600160a01b031690816001600160a01b0316815250507f000000000000000000000000000000000000000000000000000000000000000081600181518110610ccc57610ccc610f1c565b60200260200101906001600160a01b031690816001600160a01b03168152505090565b80356001600160a01b0381168114610d0657600080fd5b919050565b600060208284031215610d1d57600080fd5b610d2682610cef565b9392505050565b8060070b8114610d3c57600080fd5b50565b60008060408385031215610d5257600080fd5b8235610d5d81610d2d565b946020939093013593505050565b600060208284031215610d7d57600080fd5b8135610d2681610d2d565b60008060408385031215610d9b57600080fd5b610da483610cef565b91506020830135610db481610d2d565b809150509250929050565b600081518084526020840193506020830160005b82811015610dfa5781516001600160a01b0316865260209586019590910190600101610dd3565b5093949350505050565b848152608060208201526000610e1d6080830186610dbf565b6001600160a01b03949094166040830152506060015292915050565b634e487b7160e01b600052604160045260246000fd5b600060208284031215610e6157600080fd5b815167ffffffffffffffff811115610e7857600080fd5b8201601f81018413610e8957600080fd5b805167ffffffffffffffff811115610ea357610ea3610e39565b8060051b604051601f19603f830116810181811067ffffffffffffffff82111715610ed057610ed0610e39565b604052918252602081840181019290810187841115610eee57600080fd5b6020850194505b83851015610f1157845180825260209586019590935001610ef5565b509695505050505050565b634e487b7160e01b600052603260045260246000fd5b600060208284031215610f4457600080fd5b8151610d2681610d2d565b634e487b7160e01b600052601160045260246000fd5b81810381811115610c1e57610c1e610f4f565b828152604060208201526000610f916040830184610dbf565b949350505050565b8082028115828204841417610c1e57610c1e610f4f56fea2646970667358221220c43ca4c35845474717c206e94f1f16d66e8dc3ad46817a9776834c69964836f464736f6c634300081c0033",
+  "deployedBytecode": "0x6080604052600436106100e15760003560e01c80639416fb451161007f578063d0a6d1a611610059578063d0a6d1a6146102eb578063e5d1285514610313578063e66825c314610347578063f887ea401461037b57600080fd5b80639416fb4514610281578063b0ff2aec14610296578063cae44fd6146102cb57600080fd5b806338d52e0f116100bb57806338d52e0f146101b157806365977c4d146101e55780637b9e618d146102195780638da5cb5b1461024d57600080fd5b80630d2737291461013d5780631bc921621461015d5780631d94c9231461019057600080fd5b3661013857336001600160a01b037f00000000000000000000000000000000000000000000000000000000000000001614610136576040516305578a6b60e51b81523360048201526024015b60405180910390fd5b005b600080fd5b34801561014957600080fd5b50610136610158366004610d0b565b6103af565b34801561016957600080fd5b5061017361016781565b6040516001600160a01b0390911681526020015b60405180910390f35b6101a361019e366004610d3f565b6104fe565b604051908152602001610187565b3480156101bd57600080fd5b506101737f000000000000000000000000000000000000000000000000000000000000000081565b3480156101f157600080fd5b506101737f000000000000000000000000000000000000000000000000000000000000000081565b34801561022557600080fd5b506101737f000000000000000000000000000000000000000000000000000000000000000081565b34801561025957600080fd5b506101737f000000000000000000000000000000000000000000000000000000000000000081565b34801561028d57600080fd5b506101366107f3565b3480156102a257600080fd5b506102b66102b1366004610d6b565b610955565b60408051928352602083019190915201610187565b3480156102d757600080fd5b506101366102e6366004610d88565b610a1e565b3480156102f757600080fd5b50610300601681565b60405160079190910b8152602001610187565b34801561031f57600080fd5b506101737f000000000000000000000000000000000000000000000000000000000000000081565b34801561035357600080fd5b506101a37f000000000000000000000000000000000000000000000000000000000000000081565b34801561038757600080fd5b506101737f000000000000000000000000000000000000000000000000000000000000000081565b336001600160a01b037f000000000000000000000000000000000000000000000000000000000000000016146103f8576040516330cd747160e01b815260040160405180910390fd5b6001600160a01b03811661041f5760405163d92e233d60e01b815260040160405180910390fd5b47600081900361044257604051630d44987f60e21b815260040160405180910390fd5b6000826001600160a01b03168260405160006040518083038185875af1925050503d806000811461048f576040519150601f19603f3d011682016040523d82523d6000602084013e610494565b606091505b50509050806104b6576040516313dd85ff60e31b815260040160405180910390fd5b826001600160a01b03167f4243929a48429ffa81882248e5555b68c203635434f32bc7b64d1b3051f83b56836040516104f191815260200190565b60405180910390a2505050565b600080546001146105225760405163558a1e0360e11b815260040160405180910390fd5b600260005542821015610551576040516373c10ec160e11b81526004810183905242602482015260440161012d565b600061055c84610bc5565b905060007f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031663fb3bdb413484610599610c24565b7f0000000000000000000000000000000000000000000000000000000000000000896040518663ffffffff1660e01b81526004016105da9493929190610e04565b60006040518083038185885af11580156105f8573d6000803e3d6000fd5b50505050506040513d6000823e601f3d908101601f191682016040526106219190810190610e4f565b90508060008151811061063657610636610f1c565b602090810291909101015160405163eca3691760e01b81527f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03166004820152306024820152336044820152600787900b60648201529093506000906101679063eca36917906084016020604051808303816000875af11580156106c5573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906106e99190610f32565b9050600781900b6016146107165760405163c0c2ed8960e01b8152600782900b600482015260240161012d565b60006107228534610f65565b9050801561079557604051600090339083908381818185875af1925050503d806000811461076c576040519150601f19603f3d011682016040523d82523d6000602084013e610771565b606091505b505090508061079357604051633c31275160e21b815260040160405180910390fd5b505b60408051600789900b8152602081018690529081018690526060810182905233907fce7c595531f1524f97f7205dee05f28362aa32a4444e5ff39b41219b04df32e29060800160405180910390a25050600160005550909392505050565b336001600160a01b037f0000000000000000000000000000000000000000000000000000000000000000161461083c576040516330cd747160e01b815260040160405180910390fd5b60405163248a35ef60e11b81523060048201526001600160a01b037f0000000000000000000000000000000000000000000000000000000000000000166024820152600090610167906349146bde906044016020604051808303816000875af11580156108ad573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906108d19190610f32565b9050600781900b6016146108fe5760405163e9ca881b60e01b8152600782900b600482015260240161012d565b6040516001600160a01b037f000000000000000000000000000000000000000000000000000000000000000016907f6d45b36f677ece19af8e11dbd485e91a9f8ad532bae15ae5e69a270796692f0990600090a250565b60008061096183610bc5565b90507f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316631f00ca748261099b610c24565b6040518363ffffffff1660e01b81526004016109b8929190610f78565b600060405180830381865afa1580156109d5573d6000803e3d6000fd5b505050506040513d6000823e601f3d908101601f191682016040526109fd9190810190610e4f565b600081518110610a0f57610a0f610f1c565b60200260200101519150915091565b336001600160a01b037f00000000000000000000000000000000000000000000000000000000000000001614610a67576040516330cd747160e01b815260040160405180910390fd5b6001600160a01b038216610a8e5760405163d92e233d60e01b815260040160405180910390fd5b60008160070b13610ab25760405163162908e360e11b815260040160405180910390fd5b60405163eca3691760e01b81526001600160a01b037f00000000000000000000000000000000000000000000000000000000000000008116600483015230602483015283166044820152600782900b60648201526000906101679063eca36917906084016020604051808303816000875af1158015610b35573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610b599190610f32565b9050600781900b601614610b865760405163313a3bf960e21b8152600782900b600482015260240161012d565b604051600783900b81526001600160a01b038416907fd91065cbaea8103e730e2ced6f4973724b8f119d9921e8f0ee0c00895c8366d0906020016104f1565b6000808260070b13610bea5760405163162908e360e11b815260040160405180910390fd5b610c1e7f000000000000000000000000000000000000000000000000000000000000000067ffffffffffffffff8416610f99565b92915050565b60408051600280825260608083018452926020830190803683370190505090507f000000000000000000000000000000000000000000000000000000000000000081600081518110610c7857610c78610f1c565b60200260200101906001600160a01b031690816001600160a01b0316815250507f000000000000000000000000000000000000000000000000000000000000000081600181518110610ccc57610ccc610f1c565b60200260200101906001600160a01b031690816001600160a01b03168152505090565b80356001600160a01b0381168114610d0657600080fd5b919050565b600060208284031215610d1d57600080fd5b610d2682610cef565b9392505050565b8060070b8114610d3c57600080fd5b50565b60008060408385031215610d5257600080fd5b8235610d5d81610d2d565b946020939093013593505050565b600060208284031215610d7d57600080fd5b8135610d2681610d2d565b60008060408385031215610d9b57600080fd5b610da483610cef565b91506020830135610db481610d2d565b809150509250929050565b600081518084526020840193506020830160005b82811015610dfa5781516001600160a01b0316865260209586019590910190600101610dd3565b5093949350505050565b848152608060208201526000610e1d6080830186610dbf565b6001600160a01b03949094166040830152506060015292915050565b634e487b7160e01b600052604160045260246000fd5b600060208284031215610e6157600080fd5b815167ffffffffffffffff811115610e7857600080fd5b8201601f81018413610e8957600080fd5b805167ffffffffffffffff811115610ea357610ea3610e39565b8060051b604051601f19603f830116810181811067ffffffffffffffff82111715610ed057610ed0610e39565b604052918252602081840181019290810187841115610eee57600080fd5b6020850194505b83851015610f1157845180825260209586019590935001610ef5565b509695505050505050565b634e487b7160e01b600052603260045260246000fd5b600060208284031215610f4457600080fd5b8151610d2681610d2d565b634e487b7160e01b600052601160045260246000fd5b81810381811115610c1e57610c1e610f4f565b828152604060208201526000610f916040830184610dbf565b949350505050565b8082028115828204841417610c1e57610c1e610f4f56fea2646970667358221220c43ca4c35845474717c206e94f1f16d66e8dc3ad46817a9776834c69964836f464736f6c634300081c0033",
+  "devdoc": {
+    "details": "Inside a Hedera contract, HBAR amounts (`msg.value`, balances) are tinybars, 8 decimals.      Clients send weibars, 18 decimals, and the JSON-RPC relay converts between them.      This contract deliberately does **not** check KYC, freeze or pause status. Those rules      belong to the token and the network applies them during step 2. Checking here as well      would fail earlier but is not the guarantee, and it invites the belief that the network's      check is redundant. A frontend may pre-check to show a friendlier message.",
+    "events": {
+      "HbarSwept(address,uint256)": {
+        "params": {
+          "amount": "Tinybars moved.",
+          "to": "The recipient."
+        }
+      },
+      "InventoryWithdrawn(address,int64)": {
+        "params": {
+          "to": "The recipient.",
+          "units": "Asset units moved."
+        }
+      },
+      "Purchased(address,int64,uint256,uint256,uint256)": {
+        "params": {
+          "buyer": "The account that paid and received the asset.",
+          "hbarRefunded": "Tinybars returned to the buyer.",
+          "hbarSpent": "Tinybars the swap consumed.",
+          "settlementPaid": "Settlement-token base units paid to the issuer.",
+          "units": "Asset units delivered."
+        }
+      }
+    },
+    "kind": "dev",
+    "methods": {
+      "associateAsset()": {
+        "details": "The issuer must also grant this contract KYC before sending it inventory, otherwise      the inventory transfer itself is refused with 176."
+      },
+      "buy(int64,uint256)": {
+        "details": "`msg.value` is the buyer's maximum spend, not the price: the router takes what the      trade costs and the rest comes back.",
+        "params": {
+          "deadline": "Unix timestamp after which the quote is no longer honoured.",
+          "units": "Asset units to buy."
+        },
+        "returns": {
+          "hbarSpent": "Tinybars the swap actually consumed."
+        }
+      },
+      "constructor": {
+        "params": {
+          "asset_": "The permissioned HTS asset to sell.",
+          "issuerTreasury_": "Settlement recipient; the `evm_address` for an aliased account.",
+          "pricePerUnit_": "Settlement base units per asset unit.",
+          "router_": "SaucerSwap V1 router.",
+          "settlementToken_": "The token the issuer is paid in."
+        }
+      },
+      "quote(int64)": {
+        "details": "A quote is only good for the reserves it was read at. `buy` re-prices at execution and      is bounded by `msg.value`, so a stale quote costs the buyer nothing beyond fees.",
+        "params": {
+          "units": "Asset units to price."
+        },
+        "returns": {
+          "hbarRequired": "Tinybars needed at current reserves.",
+          "settlementAmount": "Settlement base units the issuer would receive."
+        }
+      },
+      "sweepHbar(address)": {
+        "details": "A completed purchase leaves no HBAR behind, but Hedera does not run `receive()` on a      native CryptoTransfer, so HBAR can still arrive without passing the guard below.      Without this it would be stranded.",
+        "params": {
+          "to": "The recipient."
+        }
+      },
+      "withdrawInventory(address,int64)": {
+        "details": "Without this the asset is stranded in an abandoned sale. The recipient must be      associated with the asset and hold KYC, or the network refuses with 184 or 176.",
+        "params": {
+          "to": "The recipient.",
+          "units": "Asset units to move."
+        }
+      }
+    },
+    "title": "SanadSale",
+    "version": 1
+  },
+  "userdoc": {
+    "errors": {
+      "AssociationFailed(int64)": [
+        {
+          "notice": "The contract could not associate itself with the asset."
+        }
+      ],
+      "DeliveryFailed(int64)": [
+        {
+          "notice": "The network refused to deliver the asset, so the whole purchase is reverted.         176 KYC not granted, 165 account frozen, 184 not associated, 265 token paused."
+        }
+      ],
+      "InvalidAmount()": [
+        {
+          "notice": "Units must be positive; the price must not be zero."
+        }
+      ],
+      "NotOwner()": [
+        {
+          "notice": "Caller is not the issuer operations account."
+        }
+      ],
+      "NothingToSweep()": [
+        {
+          "notice": "There is no HBAR to recover."
+        }
+      ],
+      "QuoteExpired(uint256,uint256)": [
+        {
+          "notice": "The quote was no longer valid when the transaction reached consensus."
+        }
+      ],
+      "Reentrancy()": [
+        {
+          "notice": "A nested call into a guarded function."
+        }
+      ],
+      "RefundFailed()": [
+        {
+          "notice": "Forwarding HBAR to the buyer failed, so the purchase is reverted."
+        }
+      ],
+      "SweepFailed()": [
+        {
+          "notice": "Sending HBAR to the recipient failed."
+        }
+      ],
+      "UnexpectedHbarSender(address)": [
+        {
+          "notice": "Only the router's refund may reach `receive()`."
+        }
+      ],
+      "WithdrawalFailed(int64)": [
+        {
+          "notice": "The network refused to move inventory out."
+        }
+      ],
+      "ZeroAddress()": [
+        {
+          "notice": "A required address was zero."
+        }
+      ]
+    },
+    "events": {
+      "AssetAssociated(address)": {
+        "notice": "The contract associated itself with the asset so it can hold inventory."
+      },
+      "HbarSwept(address,uint256)": {
+        "notice": "HBAR that arrived outside a purchase was recovered."
+      },
+      "InventoryWithdrawn(address,int64)": {
+        "notice": "Unsold inventory left the contract."
+      },
+      "Purchased(address,int64,uint256,uint256,uint256)": {
+        "notice": "A completed purchase."
+      }
+    },
+    "kind": "user",
+    "methods": {
+      "HTS()": {
+        "notice": "The Hedera Token Service system contract."
+      },
+      "SUCCESS()": {
+        "notice": "HTS response code for success."
+      },
+      "asset()": {
+        "notice": "The permissioned asset being sold."
+      },
+      "associateAsset()": {
+        "notice": "Associates this contract with the asset so it can hold sale inventory."
+      },
+      "buy(int64,uint256)": {
+        "notice": "Buys `units` of the asset, paying in HBAR."
+      },
+      "issuerTreasury()": {
+        "notice": "Where settlement lands. For an ECDSA account this must be its `evm_address`: HTS refuses transfers to the long-zero address of an aliased account with INVALID_ALIAS_KEY (282)."
+      },
+      "owner()": {
+        "notice": "The issuer operations account. Set once, at construction, and never transferable."
+      },
+      "pricePerUnit()": {
+        "notice": "Settlement-token base units charged per one asset unit."
+      },
+      "quote(int64)": {
+        "notice": "The HBAR the pool currently requires for `units`, and the settlement it produces."
+      },
+      "router()": {
+        "notice": "The SaucerSwap V1 router used for the HBAR to settlement-token leg."
+      },
+      "settlementToken()": {
+        "notice": "The token the issuer is paid in."
+      },
+      "sweepHbar(address)": {
+        "notice": "Recovers HBAR held by this contract."
+      },
+      "whbarToken()": {
+        "notice": "The WHBAR **token**, read from the router at construction. Swap paths start here."
+      },
+      "withdrawInventory(address,int64)": {
+        "notice": "Moves unsold inventory out of the contract."
+      }
+    },
+    "notice": "Sells units of a permissioned HTS asset for HBAR, in one transaction:         1. SaucerSwap V1 converts the buyer's HBAR into exactly the settlement amount and pays            the issuer's treasury directly.         2. This contract delivers the asset from its own inventory.         3. The router's refund of unused HBAR is forwarded to the buyer.         If step 2 is refused, step 1 is undone with it. There is no state in which the buyer         has paid and not been served.",
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 267,
+        "contract": "contracts/SanadSale.sol:SanadSale",
+        "label": "_lock",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_uint256"
+      }
+    ],
+    "types": {
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}

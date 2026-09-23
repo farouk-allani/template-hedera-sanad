@@ -71,6 +71,14 @@ yarn sanad:test               # the acceptance suite, against real testnet
 It is refused for any network other than testnet. For anything holding real value, leave it empty
 and use `yarn hardhat:account:import`, which keeps the key encrypted and asks for a password.
 
+The app ships pointed at a live demo sale on testnet (the one under
+[Testnet evidence](#testnet-evidence)), so it works before you deploy anything. `sanad:setup` deploys
+your own and points the app at it instead, by rewriting two files:
+`packages/nextjs/contracts/deployedContracts.ts` and
+`packages/hardhat/deployments/hederaTestnet/SanadSale.json`. Commit both, and your fork ships
+pointed at your sale. The second is committed on purpose: the frontend's contract list is rebuilt
+from `deployments/` on every deploy, so a sale whose record is not there disappears from the app.
+
 `sanad:setup` spends real testnet HBAR, most of it seeding the pool. It checkpoints every step that
 costs something, so a run that fails partway resumes instead of paying twice.
 

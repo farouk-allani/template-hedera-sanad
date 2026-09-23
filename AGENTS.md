@@ -44,7 +44,10 @@ someone's money, so do not "simplify" any of them without being asked.
 - Hardhat config and networks: `packages/hardhat/hardhat.config.ts`
 - Frontend config and networks: `packages/nextjs/scaffold.config.ts`
 - After a deploy, ABIs are generated into `packages/nextjs/contracts/deployedContracts.ts`; never
-  edit that by hand.
+  edit that by hand. `yarn sanad:setup` regenerates it too.
+- `packages/hardhat/deployments/hederaTestnet/SanadSale.json` is committed deliberately. The
+  contract list is rebuilt from `deployments/` on every deploy, so deleting or ignoring that record
+  silently removes the sale from the app. Other deployment records stay gitignored.
 
 ## Verifying a change
 

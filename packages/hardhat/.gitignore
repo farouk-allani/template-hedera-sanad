@@ -20,8 +20,11 @@ artifacts
 artifacts-zk
 cache-zk
 
-# deployments
-deployments
+# deployments: only the testnet record the app ships pointed at is committed, and a developer's
+# own `yarn sanad:setup` overwrites it. Local-node records and compiler inputs stay out.
+deployments/*
+!deployments/hederaTestnet/
+deployments/hederaTestnet/solcInputs/
 
 # typescript
 *.tsbuildinfo
