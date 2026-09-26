@@ -49,8 +49,10 @@ through `cross-env` so they run the same on Windows, macOS and Linux.
 - [Node.js](https://nodejs.org/) 20.18.3 or later
 - Yarn 3 via Corepack (`corepack enable`), or npm 10+ if you scaffold with `--package-manager npm`
 - Git with `user.name` and `user.email` set; the scaffold CLI refuses to run without them
-- For testnet: an **ECDSA** account from the [Hedera Portal](https://portal.hedera.com) and test
-  HBAR from its [faucet](https://portal.hedera.com/faucet)
+- For your own sale on testnet: an **ECDSA** account from the
+  [Hedera Portal](https://portal.hedera.com). It starts with 1,000 test HBAR and can draw up to
+  1,000 a day, and setup spends about 200. The anonymous [faucet](https://portal.hedera.com/faucet)
+  gives 100, which is plenty for a buyer's wallet but not enough for setup.
 
 ## Environment variables
 

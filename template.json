@@ -31,7 +31,10 @@
         {
           "title": "Run the whole flow on your own sale",
           "steps": [
-            { "text": "Fund an ECDSA account from the Hedera Portal faucet.", "url": "https://portal.hedera.com/faucet" },
+            {
+              "text": "Create an ECDSA testnet account at the Hedera Portal. It starts with 1,000 HBAR; setup spends about 200, more than the anonymous faucet gives.",
+              "url": "https://portal.hedera.com"
+            },
             {
               "text": "Copy packages/hardhat/.env.example to .env there and set OPERATOR_KEY to that account's key. Testnet only; never commit it."
             },
