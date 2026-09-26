@@ -31,13 +31,13 @@ import {
 const ROUTER_ABI = ["function factory() view returns (address)", "function whbar() view returns (address)"];
 const FACTORY_ABI = ["function getPair(address, address) view returns (address)"];
 
-interface MirrorToken {
+type MirrorToken = {
   token_id: string;
   symbol: string;
   decimals: string;
   type: string;
   kyc_key: object | null;
-}
+};
 
 /** A setting or on-chain state that stops the deployment. Printed as a message, not a stack trace. */
 class Refusal extends Error {}
