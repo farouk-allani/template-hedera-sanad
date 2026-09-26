@@ -60,10 +60,10 @@ to run against the demo sale. Running your own sale needs one: `OPERATOR_KEY`, o
 
 | Variable | Default | Read by | What it does |
 |---|---|---|---|
-| `OPERATOR_KEY` | none | `sanad:setup`, `sanad:test` | The issuer's ECDSA testnet key, hex or DER. Refused for any network other than testnet. |
+| `OPERATOR_KEY` | none | `sanad:setup`, `sanad:deploy`, `sanad:test` | The issuer's ECDSA testnet key, hex or DER. Refused for any network other than testnet. |
 | `DEPLOYER_PRIVATE_KEY_ENCRYPTED` | none | `sanad:*`, `hardhat:deploy`, `hardhat:account` | Written by `yarn hardhat:account:generate` or `yarn hardhat:account:import`, and unlocked with a password. Use it for any key that holds real value. |
 | `HEDERA_RPC_URL` | `https://testnet.hashio.io/api` | `hardhat:test`, `hardhat:chain` | The endpoint the local test network forks from. It does not change where anything is deployed: the `hederaTestnet` and `hederaMainnet` networks have their own URLs in `hardhat.config.ts`. |
-| `HEDERA_MIRROR_TESTNET_URL` | `https://testnet.mirrornode.hedera.com` | `sanad:setup`, `sanad:test` | The mirror node the scripts read accounts, tokens and results from. |
+| `HEDERA_MIRROR_TESTNET_URL` | `https://testnet.mirrornode.hedera.com` | `sanad:setup`, `sanad:deploy`, `sanad:test` | The mirror node the scripts read accounts, tokens and results from. |
 | `SAUCERSWAP_V1_ROUTER_ID` | `0.0.19264` | `sanad:setup`, `sanad:deploy` | The SaucerSwap V1 router the sale swaps through. Setup records it with the deployment. |
 | `SANAD_ASSET_ID`, `SANAD_SETTLEMENT_ID`, `SANAD_PRICE`, `SANAD_INVENTORY`, `SANAD_TREASURY` | none | `sanad:deploy` | The sale to deploy for tokens you already have. See [Customising it for your asset](#customising-it-for-your-asset). |
 
@@ -118,8 +118,9 @@ switch to change them, so the terms a buyer sees cannot be edited underneath the
 - `contracts/SanadSale.sol` is the sale. `contracts/interfaces/` holds the parts of the Token Service
   and the SaucerSwap router it calls, and `contracts/mocks/` a router that stands in for SaucerSwap
   in local tests.
-- `scripts/sanad/setupTestnet.ts` is `yarn sanad:setup`; `scripts/sanad/hedera.ts` holds what it
-  shares with the acceptance suite. `scripts/runSanadWithPK.ts` hands the key to hardhat.
+- `scripts/sanad/setupTestnet.ts` is `yarn sanad:setup` and `scripts/sanad/deploySale.ts` is
+  `yarn sanad:deploy`; `scripts/sanad/hedera.ts` holds what they share with the acceptance suite.
+  `scripts/runSanadWithPK.ts` hands the key to hardhat.
 - `test/SanadSale.test.ts` is the local suite (`yarn hardhat:test`, no HBAR);
   `test-testnet/SanadSale.acceptance.ts` is the testnet suite (`yarn sanad:test`).
 - `deployments/hederaTestnet/SanadSale.json` records the sale the app points at.
@@ -146,9 +147,9 @@ yarn sanad:test               # the acceptance suite, against real testnet
 
 `OPERATOR_KEY` is the private key of an ECDSA account from the
 [Hedera Portal](https://portal.hedera.com), hex or DER-encoded, whichever the Portal shows you. It
-is used as-is so testnet costs you no password prompts.
-It is refused for any network other than testnet. For anything holding real value, leave it empty
-and use `yarn hardhat:account:import`, which keeps the key encrypted and asks for a password.
+is used as-is so testnet costs you no password prompts, and it is refused for any network other
+than testnet. For anything holding real value, leave it empty and use
+`yarn hardhat:account:import`, which keeps the key encrypted and asks for a password.
 
 The app ships pointed at a live demo sale on testnet (the one under
 [Testnet evidence](#testnet-evidence)), so it works before you deploy anything. `sanad:setup` deploys
@@ -314,8 +315,8 @@ Because the two sides want different things. The buyer holds HBAR and does not w
 acquire a stablecoin first; the issuer needs to be paid in a stable unit and does not want price
 risk between quote and settlement. Doing the conversion inside the purchase means the buyer spends
 HBAR, the issuer receives exactly the settlement amount, and neither has to trust the other to
-convert. If your buyers already hold your settlement token, Sanad's swap is a detour you do
-not need.
+convert. If your buyers already hold your settlement token, Sanad's swap is a detour you do not
+need.
 
 ## Hedera traps this template handles
 
