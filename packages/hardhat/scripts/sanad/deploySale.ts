@@ -12,10 +12,11 @@
  *
  * It never signs with the asset's KYC key. If the asset has one, the sale contract has to be approved
  * by whoever holds it before it can hold units; the script stops, says how, and a rerun carries on.
- * Rerunning with unchanged settings reuses the deployed sale.
+ * Rerunning with unchanged settings reuses the deployed sale. Once the sale is stocked, its terms are
+ * published to the asset's offering record (see offeringRecord.ts).
  */
 import hre from "hardhat";
-import { AccountId, Client, TokenId, TransferTransaction } from "@hashgraph/sdk";
+import { AccountId, Client, PublicKey, TokenId, TransferTransaction } from "@hashgraph/sdk";
 import generateTsAbis from "../generateTsAbis";
 import {
   SAUCERSWAP_V1_ROUTER_ID,
@@ -27,6 +28,7 @@ import {
   tokenRelationship,
   waitForRelationship,
 } from "./hedera";
+import { recordSaleOpened } from "./offeringRecord";
 
 const ROUTER_ABI = ["function factory() view returns (address)", "function whbar() view returns (address)"];
 const FACTORY_ABI = ["function getPair(address, address) view returns (address)"];
@@ -64,9 +66,9 @@ async function main() {
     throw new Refusal("SANAD_INVENTORY must be a whole number of units, 0 or more.");
   }
 
-  const { client, accountId, evmAddress } = await issuer();
+  const { client, accountId, evmAddress, key } = await issuer();
   try {
-    await deploy(client, accountId, evmAddress, { assetId, settlementId, price, inventory });
+    await deploy(client, accountId, evmAddress, key.publicKey, { assetId, settlementId, price, inventory });
   } finally {
     client.close(); // an open client keeps node alive, even after an error
   }
@@ -76,6 +78,7 @@ async function deploy(
   client: Client,
   signerId: AccountId,
   signerEvm: string,
+  signerKey: PublicKey,
   settings: { assetId: string; settlementId: string; price: string; inventory: number },
 ) {
   const { ethers, deployments, getNamedAccounts } = hre;
@@ -206,6 +209,17 @@ async function deploy(
     ).getReceipt(client);
     console.log(`  moved ${missing} from ${signerId}`);
   }
+
+  step("Publishing the sale to the asset's offering record");
+  await recordSaleOpened(client, signerKey, {
+    sale: saleId,
+    address: deployed.address.toLowerCase(),
+    asset: asset.token_id,
+    settlement: settlement.token_id,
+    pricePerUnit: pricePerUnit.toString(),
+    treasury: treasury.evm_address.toLowerCase(),
+    router: SAUCERSWAP_V1_ROUTER_ID,
+  });
 
   const [hbarRequired] = await sale.quote(1);
   console.log(`\n✓ ${saleId} sells ${asset.symbol} at ${settings.price} ${settlement.symbol} a unit.`);

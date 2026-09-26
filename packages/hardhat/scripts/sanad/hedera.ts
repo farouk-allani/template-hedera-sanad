@@ -199,5 +199,5 @@ export function decodeRevert(errorMessage: string | null, iface: Interface): str
 }
 
 export const mirrorTxUrl = (hash: string) => `${MIRROR}/api/v1/contracts/results/${hash}`;
-export const hashscan = (kind: "token" | "contract" | "account", id: string) =>
+export const hashscan = (kind: "token" | "contract" | "account" | "topic", id: string) =>
   `https://hashscan.io/testnet/${kind}/${id}`;

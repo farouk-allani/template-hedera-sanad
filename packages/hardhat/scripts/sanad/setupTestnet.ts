@@ -2,7 +2,8 @@
  * Builds a complete Sanad demo on Hedera testnet: a settlement token, a permissioned asset with a
  * different key for each of its six roles, an account for the compliance officer who holds the KYC
  * key, two buyers of which only one is approved, a SaucerSwap V1 pool, the sale contract, and its
- * opening inventory. It then points the frontend at the new sale.
+ * opening inventory. It then publishes the sale to the asset's offering record (an HCS topic, see
+ * offeringRecord.ts) and points the frontend at the new sale.
  *
  * Run it with `yarn sanad:setup` from the repository root, not directly: hardhat reads the
  * deployer key from its config before any script runs, and the wrapper is what puts it there.
@@ -22,6 +23,7 @@ import {
   Client,
   Hbar,
   PrivateKey,
+  PublicKey,
   TokenAssociateTransaction,
   TokenCreateTransaction,
   TokenGrantKycTransaction,
@@ -50,6 +52,7 @@ import {
   waitForContractResult,
   writeJson,
 } from "./hedera";
+import { recordSaleOpened } from "./offeringRecord";
 
 const CONFIG = {
   settlementDecimals: 6,
@@ -115,15 +118,15 @@ function loadRoleKeys(): Record<RoleName, PrivateKey> {
 }
 
 async function main() {
-  const { client, accountId, evmAddress } = await issuer();
+  const { client, accountId, evmAddress, key } = await issuer();
   try {
-    await run(client, accountId, evmAddress);
+    await run(client, accountId, evmAddress, key.publicKey);
   } finally {
     client.close(); // an open client keeps node alive, even after an error
   }
 }
 
-async function run(client: Client, issuerId: AccountId, issuerEvm: string) {
+async function run(client: Client, issuerId: AccountId, issuerEvm: string, issuerKey: PublicKey) {
   if (Object.keys(checkpoint).length > 0) console.log(`Resuming the run recorded in ${CHECKPOINT_FILE}`);
   const { ethers, deployments, getNamedAccounts } = hre;
 
@@ -334,6 +337,17 @@ async function run(client: Client, issuerId: AccountId, issuerEvm: string) {
         .execute(client)
     ).getReceipt(client);
     return CONFIG.saleInventory;
+  });
+
+  step("Publishing the sale to the asset's offering record");
+  await recordSaleOpened(client, issuerKey, {
+    sale: sanadId,
+    address: deployed.address.toLowerCase(),
+    asset: assetTokenId.toString(),
+    settlement: settlementTokenId.toString(),
+    pricePerUnit: pricePerUnit.toString(),
+    treasury: issuerEvm.toLowerCase(),
+    router: SAUCERSWAP_V1_ROUTER_ID,
   });
 
   const deployment: Deployment = {

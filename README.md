@@ -119,7 +119,8 @@ switch to change them, so the terms a buyer sees cannot be edited underneath the
   and the SaucerSwap router it calls, and `contracts/mocks/` a router that stands in for SaucerSwap
   in local tests.
 - `scripts/sanad/setupTestnet.ts` is `yarn sanad:setup` and `scripts/sanad/deploySale.ts` is
-  `yarn sanad:deploy`; `scripts/sanad/hedera.ts` holds what they share with the acceptance suite.
+  `yarn sanad:deploy`. Both publish through `scripts/sanad/offeringRecord.ts`, and
+  `scripts/sanad/hedera.ts` holds what they share with the acceptance suite.
   `scripts/runSanadWithPK.ts` hands the key to hardhat.
 - `test/SanadSale.test.ts` is the local suite (`yarn hardhat:test`, no HBAR);
   `test-testnet/SanadSale.acceptance.ts` is the testnet suite (`yarn sanad:test`).
@@ -141,7 +142,7 @@ switch to change them, so the terms a buyer sees cannot be edited underneath the
 
 ```bash
 cp packages/hardhat/.env.example packages/hardhat/.env   # then set OPERATOR_KEY
-yarn sanad:setup              # tokens, compliance account, buyers, pool, contract, inventory
+yarn sanad:setup              # tokens, compliance account, buyers, pool, sale, offering record
 yarn sanad:test               # the acceptance suite, against real testnet
 ```
 
@@ -173,6 +174,7 @@ the HBAR equivalent at the current exchange rate, so these move with the rate.
 | A buyer associating with the asset, once | 0.79 HBAR |
 | Approving or revoking a buyer | 0.04 HBAR |
 | A purchase | 0.21 HBAR in fees, plus the HBAR the pool takes for the settlement amount |
+| The asset's offering record | 0.26 HBAR to create, once per asset, and 0.008 HBAR for each sale published to it |
 
 ### Your first purchase in the browser
 
@@ -309,6 +311,24 @@ asked, not who has been checked: checking who a buyer is happens outside the led
 records the decision on it. A buyer can also send their account ID, or a link that opens the console
 on their account.
 
+## The offering record
+
+Each asset has an offering record: a Hedera Consensus Service topic that only the issuer can write
+to. `sanad:setup` and `sanad:deploy` publish a message to it whenever a sale opens: the sale's
+address, the asset, the settlement token, the price, where the issuer is paid, the router, and a
+SHA-256 fingerprint of each of the asset's keys as the ledger reported them at that moment. The
+topic has no admin key, so once it exists nobody can edit or delete it, the issuer included, and its
+submit key is the issuer's key, so nobody else can add to it. The demo's record is topic
+[`0.0.10730650`](https://hashscan.io/testnet/topic/0.0.10730650).
+
+It records what the issuer published, nothing more. It is not a history of approvals: those are
+signed from a browser wallet, and an EVM wallet cannot write to a topic, because the Consensus
+Service has no system contract. A sale is published after it is stocked, so the message is not
+atomic with anything either.
+
+The topic's ID is kept in `packages/nextjs/contracts/offeringRecord.json`, next to the deployment
+record, and committed for the same reason.
+
 ## Why SaucerSwap, and why not just pay in the stablecoin
 
 Because the two sides want different things. The buyer holds HBAR and does not want to go and
@@ -376,8 +396,8 @@ SANAD_INVENTORY=100            # units the sale should hold, moved from your acc
 It checks everything it can before it spends anything: that the asset has no decimals (the contract,
 the quote and the app all count whole units), that SaucerSwap V1 has a pool between WHBAR and the
 settlement token, and that the account being paid is associated with the settlement token and
-allowed to receive it. Then it deploys the sale, associates it with the asset, moves the inventory in
-and points the app at it.
+allowed to receive it. Then it deploys the sale, associates it with the asset, moves the inventory in,
+publishes the sale to the asset's [offering record](#the-offering-record) and points the app at it.
 
 If the asset has a KYC key, the sale contract itself has to be approved before it can hold any units,
 and the script never holds that key. It stops and prints a link to the issuer console that opens on
@@ -391,10 +411,11 @@ stablecoin and is not redeemable for anything. To be paid in a real one, pass it
 enough for your largest order. On testnet that rules out every USDC we could find: in September 2026
 six tokens used the symbol `USDC` and none had a WHBAR pool, which is why the demo seeds its own.
 
-**Point the app at a sale.** `sanad:setup` and `sanad:deploy` both rewrite two files:
-`packages/nextjs/contracts/deployedContracts.ts` and
-`packages/hardhat/deployments/hederaTestnet/SanadSale.json`. Commit both, and your fork ships
-pointed at your sale. The second is committed on purpose: the frontend's contract list is rebuilt
+**Point the app at a sale.** `sanad:setup` and `sanad:deploy` both rewrite three files:
+`packages/nextjs/contracts/deployedContracts.ts`,
+`packages/hardhat/deployments/hederaTestnet/SanadSale.json` and
+`packages/nextjs/contracts/offeringRecord.json`. Commit all three, and your fork ships pointed at your
+sale. The deployment record is committed on purpose: the frontend's contract list is rebuilt
 from `deployments/` on every deploy, so a sale whose record is not there disappears from the app.
 
 The app manages one sale at a time. Before you replace a sale, take its unsold inventory back from

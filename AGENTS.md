@@ -49,7 +49,9 @@ someone's money, so do not "simplify" any of them without being asked.
 - Contracts: `packages/hardhat/contracts/`
 - Deploying the sale: `packages/hardhat/scripts/sanad/`. `setupTestnet.ts` (`yarn sanad:setup`)
   builds a whole demo; `deploySale.ts` (`yarn sanad:deploy`) deploys a sale for tokens that already
-  exist. `packages/hardhat/deploy/` holds only Scaffold-HBAR's example contracts.
+  exist. Both publish each sale to the asset's offering record, an HCS topic (`offeringRecord.ts`),
+  whose ID they write to `packages/nextjs/contracts/offeringRecord.json`.
+  `packages/hardhat/deploy/` holds only Scaffold-HBAR's example contracts.
 - Tests: `packages/hardhat/test/`
 - Hardhat config and networks: `packages/hardhat/hardhat.config.ts`
 - Frontend config and networks: `packages/nextjs/scaffold.config.ts` (Hedera testnet only; the sale
