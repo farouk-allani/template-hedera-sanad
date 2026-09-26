@@ -1,71 +1,26 @@
-# Hardhat package (Hedera)
+# packages/hardhat
 
-Hardhat config, contracts, deploy scripts, tests, and Hashscan verification for this monorepo.
+The sale contract, its tests, and the scripts that build and test a Sanad sale on Hedera testnet.
+The [repository README](../../README.md) explains the pattern and maps the files; this page lists
+the commands. Run them from the repository root.
 
-## Local development
+| Command | What it does | HBAR |
+|---|---|---|
+| `yarn hardhat:compile` | Compiles the contracts | none |
+| `yarn hardhat:test` | The local suite: the sale's terms, the quote, the deadline, the budget, access control on every privileged function, and the `receive()` guard, against a fork of testnet with a mock router | none, though it reads from the testnet RPC |
+| `yarn hardhat:lint` | ESLint and Prettier | none |
+| `yarn sanad:setup` | Creates the tokens, the compliance account, two buyers, the pool and the sale on testnet, then points the app at the new sale | about 200 |
+| `yarn sanad:test` | The acceptance suite, against that sale: refused deliveries roll back in full, the budget and the deadline hold, and KYC calls from a browser wallet behave as the issuer console expects | about 3.3, most of it buying two units |
+| `yarn hardhat:account:generate`, `yarn hardhat:account:import` | Creates or imports an encrypted key, for anything that holds real value | none |
 
-From the repo root, use the explicit `hardhat:*` scripts for this package. Inside `packages/hardhat`, use the unprefixed package-local scripts.
+The local suite proves that a failed delivery aborts the whole purchase, but not the reason a real
+one fails: the forking plugin does not emulate the Token Service's KYC, freeze and pause rules, so a
+delivery refused with 176, 165 or 265 only happens on testnet. That is what `sanad:test` is for.
 
-1. **Start the local chain** (terminal 1, from repo root):
-   ```bash
-   yarn hardhat:chain
-   ```
-   This starts `hardhat node` with **Hedera testnet forking** (`HEDERA_FORKING=true` and `@hashgraph/system-contracts-forking`). JSON-RPC is served at **http://127.0.0.1:8545**.
+`SanadSale` has no `deploy/` script, because its constructor reads the live SaucerSwap router, which
+a local node does not have; `sanad:setup` deploys it. `yarn hardhat:chain` and
+`yarn hardhat:deploy --network localhost` still work for Scaffold-HBAR's example contracts, and the
+CI workflow uses them.
 
-2. **Deploy to the running fork** (terminal 2):
-   ```bash
-   yarn hardhat:deploy --network localhost
-   ```
-   Use **`localhost`** so Hardhat connects to the long-running node on port 8545.
-
-   **`yarn hardhat:deploy` without `--network localhost`** uses the default network `hardhat`, which is the **in-process ephemeral** Hardhat network—**not** the same process as `yarn hardhat:chain`. For deploys against the forked node you started in step 1, always pass **`--network localhost`** while that node is running.
-
-3. **Run contract tests** (from repo root; tests use `HEDERA_FORKING=true` and can run against the fork or standalone):
-   ```bash
-   yarn hardhat:test
-   ```
-
-## Deploy and verify on Hedera testnet/mainnet
-
-You need a deployer account with HBAR on the target network. Without funds, deploy and verify will fail with "Sender account not found".
-
-1. **Generate or import an account** (from the repo root):
-   ```bash
-   yarn hardhat:account:generate
-   ```
-   or
-   ```bash
-   yarn hardhat:account:import
-   ```
-   The encrypted key is stored in `packages/hardhat/.env`.
-
-2. **Fund the account on testnet:**  
-   Use the [Hedera Portal faucet](https://portal.hedera.com/faucet) to receive testnet HBAR.
-
-3. **Deploy to Hedera testnet** (from repo root):
-   ```bash
-   yarn hardhat:deploy --network hederaTestnet
-   ```
-   or
-   ```bash
-   yarn hardhat:deploy --network hedera_testnet
-   ```
-   You will be prompted to enter the password to decrypt your deployer key.
-
-4. **Verify on Hashscan** (uses deployment JSON under `deployments/<network>/`, which includes compiler metadata and sources):
-   ```bash
-   yarn hardhat:verify:testnet   # all contracts on chain 296
-   yarn hardhat:verify:mainnet   # all contracts on chain 295
-   yarn workspace @sh/hardhat verify:contract -- HederaToken testnet
-   yarn workspace @sh/hardhat verify:contract -- HederaToken testnet 0xYourContractAddress
-   ```
-
-## Layout
-
-- `contracts/` — Solidity sources
-- `deploy/` — hardhat-deploy scripts (e.g. `00_deploy_hedera_token.ts`)
-- `scripts/` — generateAccount, importAccount, verifyHedera.js, etc.
-- `test/` — contract tests
-- `hardhat.config.ts` — networks (`hardhat`, `localhost` for RPC at 127.0.0.1:8545, `hederaTestnet`, `hederaMainnet`)
-
-Network and RPC URLs are in `hardhat.config.ts`. Deployer key is read from `.env` (encrypted) and decrypted at deploy time for live networks.
+The key the Sanad scripts sign with is `OPERATOR_KEY` or the encrypted key, both described under
+"Environment variables" in the repository README.

@@ -85,17 +85,60 @@ set them by hand. Upstream's hosting helpers also read `NEXT_PUBLIC_IGNORE_BUILD
 
 ## Architecture
 
-- **packages/hardhat** — `SanadSale.sol`, the interfaces it needs, a mock router for local tests,
-  and the scripts that build and exercise a demo on testnet.
-- **packages/nextjs** — the app: `/buy` for buyers, `/issuer` for the issuer's two authorities,
-  `/activity` for the record, and upstream's `/debug` for calling the contract directly. The
-  contract supplies the sale's fixed terms and the live quote. Everything the token itself decides
-  (who is approved or frozen, whether it is paused, who holds which key, who has associated) is read
-  from the Hedera mirror node, the only place it can be read.
+```mermaid
+flowchart LR
+  subgraph browser [Browser]
+    app["Next.js app<br/>/buy, /issuer, /activity"]
+    wallet["EVM wallet"]
+  end
+  relay["JSON-RPC relay<br/>(Hashio)"]
+  mirror["Mirror node<br/>REST API"]
+  subgraph ledger [Hedera testnet]
+    sale["SanadSale<br/>holds the inventory"]
+    router["SaucerSwap V1 router<br/>WHBAR / settlement pool"]
+    hts["Hedera Token Service<br/>KYC, freeze, pause"]
+  end
+  app -- "terms, quote, simulation" --> relay
+  app -- "approvals, keys, holders, events" --> mirror
+  wallet -- "signed transactions" --> relay
+  relay -- "buy, withdraw" --> sale
+  relay -- "associate, approve, revoke" --> hts
+  sale -- "exact-output swap" --> router
+  sale -- "delivery" --> hts
+```
+
+There is no server. The app reads the sale's fixed terms and the live quote from the contract, and
+everything the token itself decides (who is approved or frozen, whether it is paused, who holds
+which key, who has associated) from the mirror node, because the contract knows none of it. Every
+change is a transaction the connected wallet signs: a buyer's association and purchase, the
+compliance wallet's approvals, the owner's withdrawals.
 
 `SanadSale` holds the inventory and knows five things, all fixed at construction: the router, the
 asset, the settlement token, where the issuer is paid, and the price per unit. It has no admin
 switch to change them, so the terms a buyer sees cannot be edited underneath them.
+
+**`packages/hardhat`**
+
+- `contracts/SanadSale.sol` is the sale. `contracts/interfaces/` holds the parts of the Token Service
+  and the SaucerSwap router it calls, and `contracts/mocks/` a router that stands in for SaucerSwap
+  in local tests.
+- `scripts/sanad/setupTestnet.ts` is `yarn sanad:setup`; `scripts/sanad/hedera.ts` holds what it
+  shares with the acceptance suite. `scripts/runSanadWithPK.ts` hands the key to hardhat.
+- `test/SanadSale.test.ts` is the local suite (`yarn hardhat:test`, no HBAR);
+  `test-testnet/SanadSale.acceptance.ts` is the testnet suite (`yarn sanad:test`).
+- `deployments/hederaTestnet/SanadSale.json` records the sale the app points at.
+- `HederaToken.sol`, `HtsTokenCreator.sol`, `deploy/` and their tests are Scaffold-HBAR's own
+  examples, as upstream ships them. Sanad does not use them.
+
+**`packages/nextjs`**
+
+- `app/buy`, `app/issuer` and `app/activity` are the three screens, `app/page.tsx` the landing page,
+  and `app/debug` upstream's contract debugger.
+- `hooks/sanad/` reads the sale and its events, reads the mirror node, works out what the connected
+  wallet is allowed to do (`useWalletRoles`), and sends the Token Service calls (`useHtsCalls`).
+- `utils/sanad/` holds the mirror node routes, the response codes, and every error message a user
+  can see (`errors.ts`).
+- `contracts/deployedContracts.ts` is generated from `deployments/`. Do not edit it by hand.
 
 ## Try it on testnet
 
@@ -182,6 +225,28 @@ are not the sale at all:
    exactly enough HBAR to pay the issuer the settlement amount, the asset moves from inventory to
    the buyer, and the unused HBAR goes back. The network checks the token's rules during the second
    of those. If it refuses, the first is undone with it.
+
+```mermaid
+sequenceDiagram
+  actor Buyer
+  participant Sale as SanadSale
+  participant Router as SaucerSwap V1 router
+  participant Issuer as Issuer treasury
+  participant HTS as Token Service
+  Buyer->>Sale: buy(units, deadline), with HBAR attached
+  Note over Sale: past the deadline? revert QuoteExpired
+  Sale->>Router: swapETHForExactTokens(price × units)
+  Router->>Issuer: exactly price × units of the settlement token
+  Router-->>Sale: the HBAR it did not need
+  Sale->>HTS: transferToken(asset, sale, buyer, units)
+  Note over HTS: KYC, freeze and pause are checked here
+  HTS-->>Sale: response code
+  alt the code is not 22 (SUCCESS)
+    Sale--xBuyer: revert DeliveryFailed(code), undoing the swap and the payment
+  else 22
+    Sale-->>Buyer: the unused HBAR, and a Purchased event
+  end
+```
 
 In the app, `/buy` walks a buyer through the three steps in that order and shows where they stand.
 Association needs no Hedera SDK and no special wallet: every HTS token answers `associate()` at its
