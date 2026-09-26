@@ -16,6 +16,7 @@
     "format": "prettier --write './**/*.(ts|sol)'",
     "lint": "eslint",
     "lint-staged": "eslint",
+    "sanad:deploy": "ts-node scripts/runSanadWithPK.ts run scripts/sanad/deploySale.ts --network hederaTestnet",
     "sanad:setup": "ts-node scripts/runSanadWithPK.ts run scripts/sanad/setupTestnet.ts --network hederaTestnet",
     "sanad:test": "ts-node scripts/runSanadWithPK.ts test test-testnet/SanadSale.acceptance.ts --network hederaTestnet",
     "test": "cross-env HEDERA_FORKING=true REPORT_GAS=true hardhat test",

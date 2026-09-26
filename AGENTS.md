@@ -47,7 +47,9 @@ someone's money, so do not "simplify" any of them without being asked.
 ## Where things live
 
 - Contracts: `packages/hardhat/contracts/`
-- Deploy scripts: `packages/hardhat/deploy/` (hardhat-deploy; `snake_case` filenames)
+- Deploying the sale: `packages/hardhat/scripts/sanad/`. `setupTestnet.ts` (`yarn sanad:setup`)
+  builds a whole demo; `deploySale.ts` (`yarn sanad:deploy`) deploys a sale for tokens that already
+  exist. `packages/hardhat/deploy/` holds only Scaffold-HBAR's example contracts.
 - Tests: `packages/hardhat/test/`
 - Hardhat config and networks: `packages/hardhat/hardhat.config.ts`
 - Frontend config and networks: `packages/nextjs/scaffold.config.ts` (Hedera testnet only; the sale
@@ -60,7 +62,7 @@ someone's money, so do not "simplify" any of them without being asked.
 - What users are told when something fails: `packages/nextjs/utils/sanad/errors.ts`. A new contract
   error needs an entry there, saying what happened and what to do next.
 - After a deploy, ABIs are generated into `packages/nextjs/contracts/deployedContracts.ts`; never
-  edit that by hand. `yarn sanad:setup` regenerates it too.
+  edit that by hand. `yarn sanad:setup` and `yarn sanad:deploy` regenerate it too.
 - `packages/hardhat/deployments/hederaTestnet/SanadSale.json` is committed deliberately. The
   contract list is rebuilt from `deployments/` on every deploy, so deleting or ignoring that record
   silently removes the sale from the app. Other deployment records stay gitignored.

@@ -10,6 +10,7 @@ the commands. Run them from the repository root.
 | `yarn hardhat:test` | The local suite: the sale's terms, the quote, the deadline, the budget, access control on every privileged function, and the `receive()` guard, against a fork of testnet with a mock router | none, though it reads from the testnet RPC |
 | `yarn hardhat:lint` | ESLint and Prettier | none |
 | `yarn sanad:setup` | Creates the tokens, the compliance account, two buyers, the pool and the sale on testnet, then points the app at the new sale | about 200 |
+| `yarn sanad:deploy` | Deploys a sale for an asset and settlement token that already exist, stocks it, and points the app at it. Configured in `.env`; see "Customising it for your asset" in the repository README | about 1.9, plus 0.04 for the KYC holder's approval |
 | `yarn sanad:test` | The acceptance suite, against that sale: refused deliveries roll back in full, the budget and the deadline hold, and KYC calls from a browser wallet behave as the issuer console expects | about 3.3, most of it buying two units |
 | `yarn hardhat:account:generate`, `yarn hardhat:account:import` | Creates or imports an encrypted key, for anything that holds real value | none |
 

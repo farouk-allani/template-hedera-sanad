@@ -43,6 +43,7 @@
     "next:vercel:yolo": "yarn workspace @sh/nextjs vercel:yolo",
     "postinstall": "husky",
     "precommit": "lint-staged",
+    "sanad:deploy": "yarn workspace @sh/hardhat sanad:deploy",
     "sanad:setup": "yarn workspace @sh/hardhat sanad:setup",
     "sanad:test": "yarn workspace @sh/hardhat sanad:test"
   },

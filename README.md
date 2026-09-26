@@ -69,7 +69,8 @@ to run against the demo sale. Running your own sale needs one: `OPERATOR_KEY`, o
 | `DEPLOYER_PRIVATE_KEY_ENCRYPTED` | none | `sanad:*`, `hardhat:deploy`, `hardhat:account` | Written by `yarn hardhat:account:generate` or `yarn hardhat:account:import`, and unlocked with a password. Use it for any key that holds real value. |
 | `HEDERA_RPC_URL` | `https://testnet.hashio.io/api` | `hardhat:test`, `hardhat:chain` | The endpoint the local test network forks from. It does not change where anything is deployed: the `hederaTestnet` and `hederaMainnet` networks have their own URLs in `hardhat.config.ts`. |
 | `HEDERA_MIRROR_TESTNET_URL` | `https://testnet.mirrornode.hedera.com` | `sanad:setup`, `sanad:test` | The mirror node the scripts read accounts, tokens and results from. |
-| `SAUCERSWAP_V1_ROUTER_ID` | `0.0.19264` | `sanad:setup` | The SaucerSwap V1 router the sale swaps through. Setup records it with the deployment. |
+| `SAUCERSWAP_V1_ROUTER_ID` | `0.0.19264` | `sanad:setup`, `sanad:deploy` | The SaucerSwap V1 router the sale swaps through. Setup records it with the deployment. |
+| `SANAD_ASSET_ID`, `SANAD_SETTLEMENT_ID`, `SANAD_PRICE`, `SANAD_INVENTORY`, `SANAD_TREASURY` | none | `sanad:deploy` | The sale to deploy for tokens you already have. See [Customising it for your asset](#customising-it-for-your-asset). |
 
 **`packages/nextjs/.env`**
 
@@ -156,11 +157,7 @@ and use `yarn hardhat:account:import`, which keeps the key encrypted and asks fo
 
 The app ships pointed at a live demo sale on testnet (the one under
 [Testnet evidence](#testnet-evidence)), so it works before you deploy anything. `sanad:setup` deploys
-your own and points the app at it instead, by rewriting two files:
-`packages/nextjs/contracts/deployedContracts.ts` and
-`packages/hardhat/deployments/hederaTestnet/SanadSale.json`. Commit both, and your fork ships
-pointed at your sale. The second is committed on purpose: the frontend's contract list is rebuilt
-from `deployments/` on every deploy, so a sale whose record is not there disappears from the app.
+your own and points the app at it instead.
 
 `sanad:setup` spends real testnet HBAR, most of it seeding the pool. It checkpoints every step that
 costs something, so a run that fails partway resumes instead of paying twice.
@@ -365,8 +362,56 @@ or checked while building Sanad, and each is handled in the code.
 
 ## Customising it for your asset
 
-What to change for a different asset, a different settlement token, or a different price, and which
-invariants must not be broken while you do it.
+**Change the demo.** `CONFIG` at the top of `packages/hardhat/scripts/sanad/setupTestnet.ts` sets the
+price, the supply, the opening inventory, how much each side puts into the pool, and what the demo
+accounts are funded with. Every `sanad:setup` creates new tokens, so a change takes effect on the next
+run. The pool's depth is the one to think about: the swap moves the price along the pool's curve, so
+a shallow pool makes large orders expensive, and an order for more settlement than the pool holds
+cannot be filled at any price.
+
+**Sell your own asset.** `yarn sanad:deploy` deploys a sale for tokens that already exist, rather
+than creating demo ones. Set these in `packages/hardhat/.env`:
+
+```bash
+SANAD_ASSET_ID=0.0.1234        # what you sell: an HTS fungible token with 0 decimals
+SANAD_SETTLEMENT_ID=0.0.5678   # what the issuer is paid in
+SANAD_PRICE=10                 # one unit, in whole settlement tokens (2.5 works too)
+SANAD_INVENTORY=100            # units the sale should hold, moved from your account
+# SANAD_TREASURY=0.0.9012      # who is paid; defaults to your account
+```
+
+It checks everything it can before it spends anything: that the asset has no decimals (the contract,
+the quote and the app all count whole units), that SaucerSwap V1 has a pool between WHBAR and the
+settlement token, and that the account being paid is associated with the settlement token and
+allowed to receive it. Then it deploys the sale, associates it with the asset, moves the inventory in
+and points the app at it.
+
+If the asset has a KYC key, the sale contract itself has to be approved before it can hold any units,
+and the script never holds that key. It stops and prints a link to the issuer console that opens on
+the sale's account. Whoever holds the KYC key presses **Approve** there, and running
+`yarn sanad:deploy` again finishes the job. Running it again with the same settings is always safe:
+it reuses the deployed sale and only tops the inventory up to `SANAD_INVENTORY`.
+
+**Settle in a real stablecoin.** `sUSD` is a demo token that setup mints for itself. It is not a
+stablecoin and is not redeemable for anything. To be paid in a real one, pass its token ID as
+`SANAD_SETTLEMENT_ID`. The only requirement Sanad adds is a SaucerSwap V1 pool against WHBAR, deep
+enough for your largest order. On testnet that rules out every USDC we could find: in September 2026
+six tokens used the symbol `USDC` and none had a WHBAR pool, which is why the demo seeds its own.
+
+**Point the app at a sale.** `sanad:setup` and `sanad:deploy` both rewrite two files:
+`packages/nextjs/contracts/deployedContracts.ts` and
+`packages/hardhat/deployments/hederaTestnet/SanadSale.json`. Commit both, and your fork ships
+pointed at your sale. The second is committed on purpose: the frontend's contract list is rebuilt
+from `deployments/` on every deploy, so a sale whose record is not there disappears from the app.
+
+The app manages one sale at a time. Before you replace a sale, take its unsold inventory back from
+`/issuer`: once the app points elsewhere, the old sale only appears in the console as one more
+account associated with the asset.
+
+**What not to change.** `AGENTS.md` lists the invariants that keep the sale correct. Among them:
+every Token Service response code is checked, the sale contract never checks KYC itself, settlement
+and delivery stay in one transaction, aliased accounts are addressed by their alias, and unsold
+inventory can always be withdrawn. They apply to people as much as to coding agents.
 
 ## Honest limits
 
@@ -405,7 +450,16 @@ Sale contract [`0.0.10667622`](https://hashscan.io/testnet/contract/0.0.10667622
 | … and revokes the approval | `SUCCESS`, returned 22 | [`0xd11f…6d8f`](https://testnet.mirrornode.hedera.com/api/v1/contracts/results/0xd11ff3030b5a4d1c75e0da9a0c92a1dd4018525d9e17ffe77a40092df7ff6d8f) |
 | A wallet without the KYC key tries to approve itself | `SUCCESS`, returned **7**, nothing changed | [`0xcd66…df6a`](https://testnet.mirrornode.hedera.com/api/v1/contracts/results/0xcd664f18de80e360c97064a1333f5a433ae175939f92037f0ee34e356714df6a) |
 
-The second row is the one worth checking. The swap had already executed inside that call; HTS then
+`sanad:deploy` was checked the same way on 26 September: it deployed a second sale for the same two
+tokens at 12 sUSD a unit, [`0.0.10729173`](https://hashscan.io/testnet/contract/0.0.10729173), and
+stopped for the KYC key holder. The compliance wallet approved the sale contract from the issuer
+console ([`0xd7bf…ba5c`](https://testnet.mirrornode.hedera.com/api/v1/contracts/results/0xd7bf7e2a54c41a51759427ec931b38cdeac45e16c439cf4aee89d1ff13daba5c)),
+a second run stocked it, a buyer bought one unit from `/buy` and the issuer received exactly 12 sUSD
+([`0x5900…eede`](https://testnet.mirrornode.hedera.com/api/v1/contracts/results/0x5900c61ad913d0e5c16da2291bd3a8c44729f8368d64f62cfb6f40d476a8eede)),
+and the owner took the rest back from `/issuer`
+([`0xc6ad…1b00`](https://testnet.mirrornode.hedera.com/api/v1/contracts/results/0xc6ad5ff64ec9dde6a181d1564df75685cbe5c14c866882bad28b0fa6009c1b00)).
+
+The second row of the table is the one worth checking. The swap had already executed inside that call; HTS then
 refused the delivery and the contract turned that response code into a full revert. Right after that
 first run, the ledger showed the refused buyer holding **0** units with `kyc_status=REVOKED`, while
 the approved buyer held **2** and the issuer's sUSD was exactly 20 higher: two units at ten. Nothing
