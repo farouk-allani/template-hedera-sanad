@@ -10,11 +10,6 @@ in which the buyer has paid and not been served.
 
 _Sanad_ (سند) is Arabic for a deed or title: the document that says a thing is yours.
 
-> **Status.** Built in the open for the Hedera Scaffold-HBAR Template Bounty. The sale contract, its
-> testnet acceptance suite and the app's screens are in place and run against a live testnet
-> deployment. Three sections are still short and are being written next: environment variables,
-> customising it for your asset, and troubleshooting.
-
 ## Who this is for
 
 You are issuing something that not everyone is allowed to hold: a fund unit, a regulated
@@ -319,8 +314,8 @@ Because the two sides want different things. The buyer holds HBAR and does not w
 acquire a stablecoin first; the issuer needs to be paid in a stable unit and does not want price
 risk between quote and settlement. Doing the conversion inside the purchase means the buyer spends
 HBAR, the issuer receives exactly the settlement amount, and neither has to trust the other to
-convert. If your buyers already hold your settlement token, you do not need Sanad's swap leg, and
-the README will say so plainly rather than sell you the detour.
+convert. If your buyers already hold your settlement token, Sanad's swap is a detour you do
+not need.
 
 ## Hedera traps this template handles
 
@@ -354,9 +349,6 @@ or checked while building Sanad, and each is handled in the code.
   its code running. `sweepHbar` exists for HBAR that arrives that way.
 - **The mirror node trails consensus by a few seconds.** A read straight after a transaction can be
   stale, so the app waits for the mirror node to show a change before reporting it.
-- **A contract wiped by a testnet reset looked deployed.** The scaffold's contract check compared
-  `getCode()` with `"0x"`, but viem returns `undefined` for an address without code, so every screen
-  waited forever. Fixed here; the app now says there is no sale at that address.
 - **Creating a SaucerSwap pool takes about 6.8 million gas.** Below that, `addLiquidityETHNewPool`
   fails inside an association. Setup gives it 9 million.
 
@@ -493,16 +485,7 @@ Sale contract [`0.0.10667622`](https://hashscan.io/testnet/contract/0.0.10667622
 | … and revokes the approval | `SUCCESS`, returned 22 | [`0xd11f…6d8f`](https://testnet.mirrornode.hedera.com/api/v1/contracts/results/0xd11ff3030b5a4d1c75e0da9a0c92a1dd4018525d9e17ffe77a40092df7ff6d8f) |
 | A wallet without the KYC key tries to approve itself | `SUCCESS`, returned **7**, nothing changed | [`0xcd66…df6a`](https://testnet.mirrornode.hedera.com/api/v1/contracts/results/0xcd664f18de80e360c97064a1333f5a433ae175939f92037f0ee34e356714df6a) |
 
-`sanad:deploy` was checked the same way on 26 September: it deployed a second sale for the same two
-tokens at 12 sUSD a unit, [`0.0.10729173`](https://hashscan.io/testnet/contract/0.0.10729173), and
-stopped for the KYC key holder. The compliance wallet approved the sale contract from the issuer
-console ([`0xd7bf…ba5c`](https://testnet.mirrornode.hedera.com/api/v1/contracts/results/0xd7bf7e2a54c41a51759427ec931b38cdeac45e16c439cf4aee89d1ff13daba5c)),
-a second run stocked it, a buyer bought one unit from `/buy` and the issuer received exactly 12 sUSD
-([`0x5900…eede`](https://testnet.mirrornode.hedera.com/api/v1/contracts/results/0x5900c61ad913d0e5c16da2291bd3a8c44729f8368d64f62cfb6f40d476a8eede)),
-and the owner took the rest back from `/issuer`
-([`0xc6ad…1b00`](https://testnet.mirrornode.hedera.com/api/v1/contracts/results/0xc6ad5ff64ec9dde6a181d1564df75685cbe5c14c866882bad28b0fa6009c1b00)).
-
-The second row of the table is the one worth checking. The swap had already executed inside that call; HTS then
+The second row is the one worth checking. The swap had already executed inside that call; HTS then
 refused the delivery and the contract turned that response code into a full revert. Right after that
 first run, the ledger showed the refused buyer holding **0** units with `kyc_status=REVOKED`, while
 the approved buyer held **2** and the issuer's sUSD was exactly 20 higher: two units at ten. Nothing
@@ -513,12 +496,14 @@ movements inside a contract call are not recorded on the parent record, so that 
 a successful purchase too. Balances and pool reserves are the evidence, which is what the
 acceptance suite asserts.
 
-The last row is the one to remember when writing a frontend. The Ethereum transaction succeeds, and
-the refusal (`INVALID_SIGNATURE`, 7) exists only in the value the call returned. Anything that trusts
-the receipt reports an approval that never happened. Simulation does not help either: it returns
-success for that call whoever sends it. So the issuer console checks that the connected wallet's
-key is the KYC key before it offers an approval, and after sending one it reads the returned code
-back from the mirror node and waits until the buyer's status has actually changed there.
+`sanad:deploy` was checked the same way on 26 September: it deployed a second sale for the same two
+tokens at 12 sUSD a unit, [`0.0.10729173`](https://hashscan.io/testnet/contract/0.0.10729173), and
+stopped for the KYC key holder. The compliance wallet approved the sale contract from the issuer
+console ([`0xd7bf…ba5c`](https://testnet.mirrornode.hedera.com/api/v1/contracts/results/0xd7bf7e2a54c41a51759427ec931b38cdeac45e16c439cf4aee89d1ff13daba5c)),
+a second run stocked it, a buyer bought one unit from `/buy` and the issuer received exactly 12 sUSD
+([`0x5900…eede`](https://testnet.mirrornode.hedera.com/api/v1/contracts/results/0x5900c61ad913d0e5c16da2291bd3a8c44729f8368d64f62cfb6f40d476a8eede)),
+and the owner took the rest back from `/issuer`
+([`0xc6ad…1b00`](https://testnet.mirrornode.hedera.com/api/v1/contracts/results/0xc6ad5ff64ec9dde6a181d1564df75685cbe5c14c866882bad28b0fa6009c1b00)).
 
 ## Troubleshooting
 
