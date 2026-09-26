@@ -10,6 +10,8 @@ in which the buyer has paid and not been served.
 
 _Sanad_ (سند) is Arabic for a deed or title: the document that says a thing is yours.
 
+![A purchase on the live testnet demo: the buyer associated and was approved, then bought one unit. The receipt shows the pool took 1.1967 HBAR, 0.012 HBAR came back, and the issuer received 10 sUSD, all in one transaction.](docs/images/buy.png)
+
 ## Who this is for
 
 You are issuing something that not everyone is allowed to hold: a fund unit, a regulated
@@ -213,6 +215,8 @@ wallets, because the buyer and the person who approves buyers are different peop
    explained before you sign anything. The receipt shows what the pool took, what came back to you,
    and what the issuer received, with a link to the transaction on HashScan.
 
+![The issuer console, connected as the compliance wallet: it recognises the KYC key, and the buyer opened from the link on /buy is now approved.](docs/images/issuer-approval.png)
+
 `/activity` then lists the purchase. To skip steps 3 to 5, import `buyer.approved` from the same
 file instead: setup has already associated and approved it. To try inventory withdrawal on
 `/issuer`, connect the account whose key is `OPERATOR_KEY`; it deployed the sale, so it owns it.
@@ -338,6 +342,8 @@ It records what the issuer published, nothing more. It is not a history of appro
 signed from a browser wallet, and an EVM wallet cannot write to a topic, because the Consensus
 Service has no system contract. A sale is published after it is stocked, so the message is not
 atomic with anything either.
+
+![The offering record on /activity: the live sale is published, its terms match, and the asset's keys have not changed. Both sales opened for the asset are listed with what each holds now.](docs/images/offering-record.png)
 
 The app reads it. `/activity` lists every sale in the record with what it holds now, and checks the
 live sale against its entry: that the issuer published it, that its terms are the ones published,
