@@ -522,8 +522,22 @@ back from the mirror node and waits until the buyer's status has actually change
 
 ## Troubleshooting
 
-Symptoms and their causes, the Hedera ones especially, where the error text alone does not tell you
-what to do next.
+Every one of these was hit while building or testing Sanad.
+
+| What you see | Why | What to do |
+|---|---|---|
+| The new project has no `SanadSale.sol`; it is plain Scaffold-HBAR | `npm create` ran without `--` before `--template`, so npm kept the flag and the CLI used its default template | Scaffold again with `-- --template farouk-allani/template-hedera-sanad` |
+| `corepack enable` fails with a permission error on Windows | It writes next to Node, in Program Files | Run it from an administrator shell, or pass `--install-directory` with a folder on your `PATH`, such as npm's `%APPDATA%\npm` |
+| A plain `npm install` fails with `ERESOLVE` about `@nomicfoundation/hardhat-verify` and `hardhat` | A peer range inherited from upstream. The scaffold CLI installs with `--legacy-peer-deps`; a plain install does not | `npm install --legacy-peer-deps` |
+| `OPERATOR_KEY is an ED25519 key` | EVM transactions can only be signed by an ECDSA (secp256k1) key | Create an ECDSA account on the Portal and use its key |
+| `sanad:setup` stopped partway, for example out of HBAR | Every step that costs something is recorded in `packages/hardhat/.sanad/testnet.partial.json` as soon as it succeeds | Top up and run it again. It resumes and does not pay twice. Deleting that file starts over and pays again |
+| A `[DEP0190] DeprecationWarning` about `shell` when a script starts on Windows | Node 24 flags how the scripts start hardhat on Windows | Nothing. It is a warning, not an error |
+| The app says **No sale found on Hedera Testnet** | Nothing is deployed at the address the app points at, usually because testnet was reset | `yarn sanad:setup`, or `yarn sanad:deploy`, points the app at a new sale |
+| `/buy` says your address **has no Hedera account yet** | An EVM address becomes a Hedera account when HBAR first arrives at it | Send it HBAR from the [faucet](https://portal.hedera.com/faucet), then come back |
+| `/issuer` offers no **Approve** button | The connected wallet's key is not the asset's KYC key. The console names the account that holds it | Connect that account; in the demo it is the `kyc` key from `.sanad/testnet.keys.json` |
+| The console reported an approval, but `/buy` still says it is waiting | The mirror node trails consensus by a few seconds, and `/buy` checks every ten | Wait for the next check |
+| A notice appears on `/buy` instead of a purchase | The page checks your standing and the pool before offering **Buy**, and simulates the purchase before asking your wallet to sign. The network would have refused it | The notice says why and what to do: frozen, paused, the pool too small for the order, the price past your tolerance, or the quote expired |
+| `sanad:deploy` stops at **Waiting for the holder of the KYC key** | The asset has a KYC key, and the sale contract needs approving like any holder | Approve it from the link it prints, then run it again ([Customising](#customising-it-for-your-asset)) |
 
 ## Licence
 
