@@ -46,10 +46,13 @@ type RecordFile = { topicId: string; asset: string };
 const fingerprint = (key: MirrorKey) =>
   key ? crypto.createHash("sha256").update(Buffer.from(key.key, "hex")).digest("hex") : null;
 
+/** A record holds one message per sale, so ten pages of a hundred is far beyond any real one. */
+const MAX_PAGES = 10;
+
 async function publishedSales(topicId: string): Promise<SaleOpened[]> {
   const sales: SaleOpened[] = [];
   let route: string | null = `/api/v1/topics/${topicId}/messages?limit=100`;
-  while (route) {
+  for (let pages = 0; route && pages < MAX_PAGES; pages++) {
     const page: { messages: { message: string }[]; links: { next: string | null } } = await mirror(route);
     for (const { message } of page.messages) {
       try {
