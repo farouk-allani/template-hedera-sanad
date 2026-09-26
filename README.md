@@ -27,8 +27,14 @@ frontend. Sanad is the smallest correct starting point for that, meant to be for
 npm create scaffold-hbar@latest my-sanad -- --template farouk-allani/template-hedera-sanad
 ```
 
-The `--` is required. Without it npm keeps `--template` for itself and the CLI never sees it, which
-silently gets you the default template instead of this one.
+The `--` is required. Without it npm takes `--template` as one of its own settings, the CLI never
+sees it, and you get the CLI's default template instead of this one; npm 11 at least warns
+`Unknown cli config "--template"`. Checked with npm 10.9.0 and 11.20.0. `npx` passes flags straight
+through, so this works as well:
+
+```bash
+npx create-scaffold-hbar@latest my-sanad --template farouk-allani/template-hedera-sanad
+```
 
 ```bash
 cd my-sanad
@@ -570,7 +576,7 @@ Every one of these was hit while building or testing Sanad.
 
 | What you see | Why | What to do |
 |---|---|---|
-| The new project has no `SanadSale.sol`; it is plain Scaffold-HBAR | `npm create` ran without `--` before `--template`, so npm kept the flag and the CLI used its default template | Scaffold again with `-- --template farouk-allani/template-hedera-sanad` |
+| The new project has no `SanadSale.sol`; it is plain Scaffold-HBAR, or the CLI stops on a Foundry version check | `npm create` ran without `--` before `--template`, so npm kept the flag (npm 11 warns `Unknown cli config "--template"`) and the CLI used its default template | Scaffold again with `-- --template farouk-allani/template-hedera-sanad`, or use `npx create-scaffold-hbar@latest` |
 | `corepack enable` fails with a permission error on Windows | It writes next to Node, in Program Files | Run it from an administrator shell, or pass `--install-directory` with a folder on your `PATH`, such as npm's `%APPDATA%\npm` |
 | A plain `npm install` fails with `ERESOLVE` about `@nomicfoundation/hardhat-verify` and `hardhat` | A peer range inherited from upstream. The scaffold CLI installs with `--legacy-peer-deps`; a plain install does not | `npm install --legacy-peer-deps` |
 | `OPERATOR_KEY is an ED25519 key` | EVM transactions can only be signed by an ECDSA (secp256k1) key | Create an ECDSA account on the Portal and use its key |
