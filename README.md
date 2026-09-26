@@ -8,7 +8,9 @@ Hedera Token Service decides whether that delivery is allowed using the token's 
 pause rules. If the network refuses, the swap and the payment are undone with it. There is no state
 in which the buyer has paid and not been served.
 
-_Sanad_ (سند) is Arabic for a deed or title: the document that says a thing is yours.
+_Sanad_ (سند) is Arabic for a deed or title: the document that says a thing is yours. Sanad is an
+independent project, built on Hedera; it is not affiliated with, sponsored or endorsed by Hedera
+Hashgraph, LLC.
 
 ![A purchase on the live testnet demo: the buyer associated and was approved, then bought one unit. The receipt shows the pool took 1.1967 HBAR, 0.012 HBAR came back, and the issuer received 10 sUSD, all in one transaction.](docs/images/buy.png)
 

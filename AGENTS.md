@@ -159,6 +159,14 @@ Use DaisyUI classes rather than raw Tailwind where DaisyUI has a component.
 <button className="px-4 py-2 bg-blue-500 rounded">Connect</button>   // avoid
 ```
 
+## Branding
+
+The app's mark is `packages/nextjs/public/logo.svg`, with `favicon.png` and `thumbnail.jpg` made
+from it. Hedera's trademark policy (brand.hedera.com) allows "Built on Hedera" as a description but
+not Hedera's logo as an app's logo or icon, nor "Hedera" in a product or domain name, and it
+requires a disclaimer that the app is not affiliated with Hedera, which the footer carries. Keep
+both if you rebrand.
+
 ## Code style
 
 | Style            | Applies to                                                            |

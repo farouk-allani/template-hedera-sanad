@@ -1,5 +1,5 @@
 {
-  "name": "Scaffold-HBAR 2 DApp",
-  "description": "A DApp built with Scaffold-HBAR",
+  "name": "Sanad",
+  "description": "Sell a permissioned asset on Hedera for HBAR, in one transaction.",
   "iconPath": "logo.svg"
 }

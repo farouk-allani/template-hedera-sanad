@@ -61,6 +61,10 @@ export const Footer = () => {
             </a>
           </div>
         </ul>
+        {/* Hedera's trademark policy (brand.hedera.com) requires this disclaimer from projects built on it. */}
+        <p className="m-0 pb-2 text-center text-xs text-base-content/50">
+          Sanad is an independent project. It is not affiliated with, sponsored or endorsed by Hedera Hashgraph, LLC.
+        </p>
       </div>
     </div>
   );
