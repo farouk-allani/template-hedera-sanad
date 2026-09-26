@@ -80,8 +80,9 @@ yarn sanad:setup              # tokens, compliance account, buyers, pool, contra
 yarn sanad:test               # the acceptance suite, against real testnet
 ```
 
-`OPERATOR_KEY` is the hex private key of an ECDSA account from the
-[Hedera Portal](https://portal.hedera.com), used as-is so testnet costs you no password prompts.
+`OPERATOR_KEY` is the private key of an ECDSA account from the
+[Hedera Portal](https://portal.hedera.com), hex or DER-encoded, whichever the Portal shows you. It
+is used as-is so testnet costs you no password prompts.
 It is refused for any network other than testnet. For anything holding real value, leave it empty
 and use `yarn hardhat:account:import`, which keeps the key encrypted and asks for a password.
 
