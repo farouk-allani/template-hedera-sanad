@@ -1,9 +1,40 @@
 "use client";
 
+import Link from "next/link";
 import { ExternalLink } from "~~/components/sanad/ExternalLink";
+import { useOfferingRecord } from "~~/hooks/sanad/useOfferingRecord";
 import type { Sale } from "~~/hooks/sanad/useSale";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-hbar";
 import { formatHbar, formatToken, hashscan, shortHex } from "~~/utils/sanad/format";
+
+/** Whether the issuer published this sale to the asset's offering record, in one line. */
+const Published = ({ sale }: { sale: Sale }) => {
+  const record = useOfferingRecord(sale);
+  if (record.status === "loading") return <>…</>;
+  if (record.status === "no-record") return <span className="opacity-70">No offering record</span>;
+  if (record.status === "unpublished") {
+    return (
+      <Link href="/activity" className="link text-warning">
+        Not in the issuer&apos;s offering record
+      </Link>
+    );
+  }
+  const concern = !record.termsMatch
+    ? "terms differ from what was published"
+    : record.changedKeys?.length
+      ? "the asset's keys have changed since"
+      : undefined;
+  return (
+    <>
+      <ExternalLink href={hashscan.topic(record.topicId)}>In the offering record</ExternalLink>
+      {concern && (
+        <Link href="/activity" className="link text-warning block text-xs">
+          {concern}
+        </Link>
+      )}
+    </>
+  );
+};
 
 /** The sale's terms and live state. Everything here is readable without a wallet. */
 export const SaleTerms = ({ sale }: { sale: Sale }) => {
@@ -43,6 +74,11 @@ export const SaleTerms = ({ sale }: { sale: Sale }) => {
             <ExternalLink href={hashscan.token(sale.settlement.id)}>
               {settlement ? settlement.symbol : sale.settlement.id}
             </ExternalLink>
+          </dd>
+
+          <dt className="opacity-70">Published</dt>
+          <dd className="m-0">
+            <Published sale={sale} />
           </dd>
 
           <dt className="opacity-70">Contract</dt>

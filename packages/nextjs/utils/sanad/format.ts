@@ -15,6 +15,7 @@ export const hashscan = {
   token: (id: string) => `${HASHSCAN_URL}/token/${id}`,
   contract: (idOrAddress: string) => `${HASHSCAN_URL}/contract/${idOrAddress}`,
   transaction: (hash: string) => `${HASHSCAN_URL}/tx/${hash}`,
+  topic: (id: string) => `${HASHSCAN_URL}/topic/${id}`,
 };
 
 const display = (value: string, maxDecimals: number) =>

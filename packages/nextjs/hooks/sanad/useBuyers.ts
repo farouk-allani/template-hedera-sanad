@@ -1,6 +1,7 @@
 import { useQueries } from "@tanstack/react-query";
 import type { Address } from "viem";
 import { useMirror } from "~~/hooks/sanad/useMirror";
+import { usePublishedSales } from "~~/hooks/sanad/useOfferingRecord";
 import type { Sale } from "~~/hooks/sanad/useSale";
 import { MirrorAccount, TokenRelationship, accountRoute, mirrorGet, relationshipRoute } from "~~/utils/sanad/mirror";
 
@@ -33,23 +34,26 @@ export const buyerQuery = (idOrAddress: string, assetId: string) => ({
 
 /**
  * The accounts associated with the asset, which is the only on-chain sign that someone wants it, and
- * a precondition for approval. The treasury and the sale hold the asset too and are left out.
+ * a precondition for approval. The treasury and the sales hold the asset too and are left out: this
+ * sale, and every earlier one in the asset's offering record, since a replaced sale stays associated.
  * Anyone can associate, so this lists who asked, not who has been verified.
  */
 export function useBuyers(sale: Sale) {
   const treasury = sale.asset.token?.treasury_account_id;
+  const record = usePublishedSales(sale.asset.id);
   const holders = useMirror<{ balances: { account: string }[]; links: { next: string | null } }>(
     treasury && sale.contractId ? `/tokens/${sale.asset.id}/balances?limit=100` : undefined,
     15_000,
   );
+  const sales = new Set([sale.contractId, ...(record.sales ?? []).map(published => published.sale)]);
   const ids = (holders.data?.balances ?? [])
     .map(holder => holder.account)
-    .filter(id => id !== treasury && id !== sale.contractId);
+    .filter(id => id !== treasury && !sales.has(id));
   const buyers = useQueries({ queries: ids.map(id => buyerQuery(id, sale.asset.id)) });
 
   return {
     buyers: buyers.flatMap(query => (query.data ? [query.data] : [])),
-    isLoading: holders.isPending || buyers.some(query => query.isPending),
+    isLoading: holders.isPending || record.isPending || buyers.some(query => query.isPending),
     truncated: Boolean(holders.data?.links.next),
   };
 }

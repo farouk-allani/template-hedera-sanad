@@ -1,6 +1,7 @@
 "use client";
 
 import type { NextPage } from "next";
+import { OfferingRecord } from "~~/app/activity/_components/OfferingRecord";
 import { SaleEvents } from "~~/app/activity/_components/SaleEvents";
 import { BuyersTable } from "~~/components/sanad/BuyersTable";
 import { Page } from "~~/components/sanad/Page";
@@ -11,7 +12,7 @@ import { type Sale } from "~~/hooks/sanad/useSale";
 const Activity: NextPage = () => (
   <Page
     title="Activity"
-    intro="What the sale contract recorded, read from the Hedera mirror node, and where every buyer stands right now. Each entry links to its transaction on HashScan."
+    intro="What the sale contract recorded, what the issuer published about it, and where every buyer stands right now, all read from the Hedera mirror node. Each entry links to HashScan."
   >
     <SaleGate>
       {sale => (
@@ -22,6 +23,7 @@ const Activity: NextPage = () => (
               <SaleEvents sale={sale} />
             </div>
           </section>
+          <OfferingRecord sale={sale} />
           <Standing sale={sale} />
         </>
       )}

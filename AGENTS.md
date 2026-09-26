@@ -59,8 +59,11 @@ someone's money, so do not "simplify" any of them without being asked.
 - Screens: `packages/nextjs/app/buy/`, `app/issuer/` and `app/activity/`; the home page is
   `app/page.tsx`. Components they share are in `packages/nextjs/components/sanad/`.
 - Frontend logic: `packages/nextjs/hooks/sanad/` (the sale, mirror node queries, the connected
-  wallet's roles, HTS calls) and `packages/nextjs/utils/sanad/` (mirror client, HTS constants,
-  formatting, error messages)
+  wallet's roles, HTS calls, the offering record) and `packages/nextjs/utils/sanad/` (mirror client,
+  HTS constants, formatting, error messages, decoding the record)
+- The offering record informs and enforces nothing. Show what it says, warn when the live sale is
+  missing from it or differs, but never block a purchase or an approval on it: the ledger enforces
+  permissions, and the record is only as current as the issuer's scripts made it.
 - What users are told when something fails: `packages/nextjs/utils/sanad/errors.ts`. A new contract
   error needs an entry there, saying what happened and what to do next.
 - After a deploy, ABIs are generated into `packages/nextjs/contracts/deployedContracts.ts`; never

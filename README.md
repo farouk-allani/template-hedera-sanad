@@ -87,15 +87,18 @@ flowchart LR
     app["Next.js app<br/>/buy, /issuer, /activity"]
     wallet["EVM wallet"]
   end
+  scripts["Issuer scripts<br/>sanad:setup, sanad:deploy"]
   relay["JSON-RPC relay<br/>(Hashio)"]
   mirror["Mirror node<br/>REST API"]
   subgraph ledger [Hedera testnet]
     sale["SanadSale<br/>holds the inventory"]
     router["SaucerSwap V1 router<br/>WHBAR / settlement pool"]
     hts["Hedera Token Service<br/>KYC, freeze, pause"]
+    hcs["Consensus Service<br/>offering record"]
   end
+  scripts -- "publish each sale" --> hcs
   app -- "terms, quote, simulation" --> relay
-  app -- "approvals, keys, holders, events" --> mirror
+  app -- "approvals, keys, holders,<br/>events, the record" --> mirror
   wallet -- "signed transactions" --> relay
   relay -- "buy, withdraw" --> sale
   relay -- "associate, approve, revoke" --> hts
@@ -105,9 +108,18 @@ flowchart LR
 
 There is no server. The app reads the sale's fixed terms and the live quote from the contract, and
 everything the token itself decides (who is approved or frozen, whether it is paused, who holds
-which key, who has associated) from the mirror node, because the contract knows none of it. Every
-change is a transaction the connected wallet signs: a buyer's association and purchase, the
-compliance wallet's approvals, the owner's withdrawals.
+which key, who has associated) from the mirror node, because the contract knows none of it, along
+with the asset's [offering record](#the-offering-record). Every change is a transaction the
+connected wallet signs: a buyer's association and purchase, the compliance wallet's approvals, the
+owner's withdrawals.
+
+| Part of Hedera | What Sanad uses it for |
+|---|---|
+| Token Service | The asset's KYC, freeze and pause rules, applied by the network at delivery. Association from any EVM wallet ([HIP-719](https://hips.hedera.com/hip/hip-719)). Approvals through the system contract at `0x167` |
+| Smart contracts | `SanadSale`: the swap, the delivery and the refund in one transaction |
+| Consensus Service | The offering record: every sale the issuer opens, its terms, and the asset's keys at the time |
+| Mirror node | What the token decides, the sale's events and the record, for the app and the scripts |
+| SaucerSwap V1 | Turning the buyer's HBAR into exactly the settlement amount, inside the purchase |
 
 `SanadSale` holds the inventory and knows five things, all fixed at construction: the router, the
 asset, the settlement token, where the issuer is paid, and the price per unit. It has no admin
@@ -253,10 +265,11 @@ network would make, whether not approved, frozen, paused or the price moved past
 up in that simulation, so the page explains it before anything is paid.
 
 `/activity` lists what the sale contract recorded, every purchase and every withdrawal, each linked
-to its transaction on HashScan, and where every buyer stands now. Approvals and revocations have no
-history there. They are token operations rather than sale events, and the mirror node cannot list
-them by token, because its record of each one names the account, not the asset. A history of them
-would need a log of its own, such as a Hedera Consensus Service topic written alongside each change.
+to its transaction on HashScan, the asset's offering record, and where every buyer stands now.
+Approvals and revocations have no history there. They are token operations rather than sale
+events, and the mirror node cannot list them by token, because its record of each one names the
+account, not the asset. A history of them would need a log written with each change, and the
+browser wallets that make those changes cannot write one (see [The offering record](#the-offering-record)).
 
 ## What is guaranteed, and by whom
 
@@ -326,8 +339,18 @@ signed from a browser wallet, and an EVM wallet cannot write to a topic, because
 Service has no system contract. A sale is published after it is stocked, so the message is not
 atomic with anything either.
 
+The app reads it. `/activity` lists every sale in the record with what it holds now, and checks the
+live sale against its entry: that the issuer published it, that its terms are the ones published,
+and whether any of the asset's keys has changed since. The sale's terms on `/` and `/buy` end with
+one line saying whether the sale is in the record, and it turns into a warning when it is not, when
+its terms differ, or when a key has changed. The buyers list leaves out every sale in the record, so
+an earlier sale for the same asset is not mistaken for a buyer. The record informs; it enforces
+nothing, and a buyer is never stopped by it.
+
 The topic's ID is kept in `packages/nextjs/contracts/offeringRecord.json`, next to the deployment
-record, and committed for the same reason.
+record, and committed for the same reason. The app finds the record through that file, so a copy of
+the app pointed at a different topic would read that topic instead; tying the record to the asset
+itself, for example in the token's memo, is the step that would close that gap.
 
 ## Why SaucerSwap, and why not just pay in the stablecoin
 
@@ -527,6 +550,12 @@ a second run stocked it, a buyer bought one unit from `/buy` and the issuer rece
 and the owner took the rest back from `/issuer`
 ([`0xc6ad…1b00`](https://testnet.mirrornode.hedera.com/api/v1/contracts/results/0xc6ad5ff64ec9dde6a181d1564df75685cbe5c14c866882bad28b0fa6009c1b00)).
 
+Both sales are in the asset's offering record, topic
+[`0.0.10730650`](https://hashscan.io/testnet/topic/0.0.10730650). The mirror node reports it with no
+admin key and the issuer's key as its submit key
+([topic](https://testnet.mirrornode.hedera.com/api/v1/topics/0.0.10730650),
+[messages](https://testnet.mirrornode.hedera.com/api/v1/topics/0.0.10730650/messages)).
+
 ## Troubleshooting
 
 Every one of these was hit while building or testing Sanad.
@@ -544,6 +573,7 @@ Every one of these was hit while building or testing Sanad.
 | `/issuer` offers no **Approve** button | The connected wallet's key is not the asset's KYC key. The console names the account that holds it | Connect that account; in the demo it is the `kyc` key from `.sanad/testnet.keys.json` |
 | The console reported an approval, but `/buy` still says it is waiting | The mirror node trails consensus by a few seconds, and `/buy` checks every ten | Wait for the next check |
 | A notice appears on `/buy` instead of a purchase | The page checks your standing and the pool before offering **Buy**, and simulates the purchase before asking your wallet to sign. The network would have refused it | The notice says why and what to do: frozen, paused, the pool too small for the order, the price past your tolerance, or the quote expired |
+| The sale's terms say **Not in the issuer's offering record** | The app points at a sale nobody published: `sanad:deploy` stopped before stocking it, or the record file names another asset's topic | Finish with `yarn sanad:deploy`. If you did not deploy the sale yourself, ask its issuer before buying |
 | `sanad:deploy` stops at **Waiting for the holder of the KYC key** | The asset has a KYC key, and the sale contract needs approving like any holder | Approve it from the link it prints, then run it again ([Customising](#customising-it-for-your-asset)) |
 
 ## Licence
