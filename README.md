@@ -53,6 +53,7 @@ through `cross-env` so they run the same on Windows, macOS and Linux.
   [Hedera Portal](https://portal.hedera.com). It starts with 1,000 test HBAR and can draw up to
   1,000 a day, and setup spends about 200. The anonymous [faucet](https://portal.hedera.com/faucet)
   gives 100, which is plenty for a buyer's wallet but not enough for setup.
+- A browser wallet that can add a custom network, such as MetaMask
 
 ## Environment variables
 
@@ -123,10 +124,9 @@ costs something, so a run that fails partway resumes instead of paying twice.
 
 The demo's keys, one per token role plus the two buyers', are written to
 `packages/hardhat/.sanad/testnet.keys.json`, which is gitignored. Setup also creates an account
-controlled by the KYC key, because approving a buyer means signing with that key. To approve buyers
-from the app, import the `kyc` key from that file into a browser wallet. It is a throwaway testnet
-key; in production the KYC key belongs to whoever actually carries out compliance, on their own
-device.
+controlled by the KYC key, because approving a buyer means signing with that key; the next section
+shows how to use it from a browser wallet. It is a throwaway testnet key. In production the KYC key
+belongs to whoever actually carries out compliance, on their own device.
 
 What it costs, measured on testnet in September 2026. Hedera prices fees in US dollars and charges
 the HBAR equivalent at the current exchange rate, so these move with the rate.
@@ -137,6 +137,36 @@ the HBAR equivalent at the current exchange rate, so these move with the rate.
 | A buyer associating with the asset, once | 0.79 HBAR |
 | Approving or revoking a buyer | 0.04 HBAR |
 | A purchase | 0.21 HBAR in fees, plus the HBAR the pool takes for the settlement amount |
+
+### Your first purchase in the browser
+
+After `sanad:setup`, the app points at your sale and you hold every key it made. A purchase needs two
+wallets, because the buyer and the person who approves buyers are different people.
+
+1. **Add Hedera Testnet to your wallet**: network name `Hedera Testnet`, RPC URL
+   `https://testnet.hashio.io/api`, chain ID `296`, currency `HBAR`, block explorer
+   `https://hashscan.io/testnet`.
+2. **The compliance wallet.** Import the `kyc` key from `packages/hardhat/.sanad/testnet.keys.json`
+   into your wallet as a new account. It is the account setup created for the KYC key, with 5 HBAR,
+   enough for about a hundred approvals.
+3. **The buyer wallet.** Create a new account in your wallet and paste its address into the
+   [faucet](https://portal.hedera.com/faucet). Hedera creates an account for the address when the
+   100 HBAR arrives; buying one unit costs about 2 HBAR in all.
+4. `yarn next:start`, connect the buyer wallet and open [localhost:3000/buy](http://localhost:3000/buy).
+   Step 1, **Associate**, is one transaction of about 0.8 HBAR. It is also the transaction that
+   completes the account the faucet created, which until then has no key on record.
+5. Step 2 shows your account ID and a link to the issuer console that opens on it. Switch your
+   wallet to the compliance account, open that link and press **Approve**. The console waits until
+   the mirror node shows the approval before it reports it.
+6. Switch back to the buyer. `/buy` notices the approval within ten seconds. Choose the units and a
+   price tolerance and press **Buy**. The page simulates the purchase first, so a refusal is
+   explained before you sign anything. The receipt shows what the pool took, what came back to you,
+   and what the issuer received, with a link to the transaction on HashScan.
+
+`/activity` then lists the purchase. To skip steps 3 to 5, import `buyer.approved` from the same
+file instead: setup has already associated and approved it. To try inventory withdrawal on
+`/issuer`, connect the account whose key is `OPERATOR_KEY`; it deployed the sale, so it owns it.
+These are throwaway testnet keys. Do not reuse them anywhere else.
 
 ## The purchase flow
 
