@@ -413,8 +413,51 @@ every Token Service response code is checked, the sale contract never checks KYC
 and delivery stay in one transaction, aliased accounts are addressed by their alias, and unsold
 inventory can always be withdrawn. They apply to people as much as to coding agents.
 
+### Running it on mainnet
+
+Sanad ships for testnet only, and we have not run it on mainnet. The contract is the same on both
+networks; the configuration changes, and so does what a mistake costs. **`SanadSale` has not been
+audited.** Have it audited before it holds anything of value.
+
+These mainnet values were read from the chain on 26 September 2026, not copied from memory:
+
+| | Mainnet | Testnet |
+|---|---|---|
+| SaucerSwap V1 router | `0.0.3045981` | `0.0.19264` |
+| WHBAR token, what the router's `whbar()` returns | `0.0.1456986` | `0.0.15058` |
+| Mirror node | `https://mainnet.mirrornode.hedera.com` | `https://testnet.mirrornode.hedera.com` |
+| JSON-RPC relay, chain ID | `https://mainnet.hashio.io/api`, 295 | `https://testnet.hashio.io/api`, 296 |
+| HashScan | `https://hashscan.io/mainnet` | `https://hashscan.io/testnet` |
+
+Hedera's documentation describes Hashio as a beta for testing, so use a production relay provider on
+mainnet. For settlement, native USDC (`0.0.456858`, 6 decimals, no KYC key) has a V1 pool against
+WHBAR, holding about 2.85 million WHBAR and 269,000 USDC that day; USDT0 (`0.0.10282787`) has none.
+USDC has a freeze key, so if its issuer froze your treasury, every purchase would revert at the
+payout.
+
+What has to change, all of it configuration:
+
+| Where | What |
+|---|---|
+| `packages/nextjs/scaffold.config.ts` | `targetNetworks` to `[chains.hedera]`, and `rpcOverrides` to your mainnet relay |
+| `packages/nextjs/utils/sanad/mirror.ts` | `MIRROR_NODE_URL` |
+| `packages/nextjs/utils/sanad/format.ts` | `HASHSCAN_URL` |
+| `packages/nextjs/components/ScaffoldHbarAppWithProviders.tsx`, `components/sanad/SaleGate.tsx` | `hederaTestnet` to `hedera` |
+| `app/page.tsx`, `app/buy/_components/BuyFlow.tsx`, `app/issuer/_components/BuyersPanel.tsx`, `components/sanad/SaleGate.tsx` | text that says "Hedera Testnet" or sends buyers to the faucet |
+| `packages/hardhat/scripts/sanad/hedera.ts` | `Client.forTestnet()` in `issuer()`, and the `hashscan` helper. `HEDERA_MIRROR_TESTNET_URL` and `SAUCERSWAP_V1_ROUTER_ID` take the mainnet values from `.env`; only their names say testnet |
+| `packages/hardhat/package.json` | a copy of `sanad:deploy` with `--network hederaMainnet`. Never `sanad:setup`, which mints demo tokens and seeds a pool with your HBAR |
+| `packages/hardhat/.gitignore` | un-ignore `deployments/hederaMainnet/` as `hederaTestnet` is, or the next deploy drops the sale from the app |
+
+Keys matter more here than anything above. `OPERATOR_KEY` is refused for any network but testnet;
+use `yarn hardhat:account:import`, which keeps the key encrypted and asks for its password on every
+run. The account that deploys owns the sale and can withdraw all of its inventory. The KYC key can
+approve anyone, so it belongs to whoever carries out compliance, on a device of its own, and never
+on the machine that deploys.
+
 ## Honest limits
 
+- `SanadSale` has not been audited. Its guarantees are backed by the tests and the testnet evidence
+  below, which is not the same thing.
 - Granting the KYC flag is a demo approval. It verifies nobody's identity and is not a
   compliance process.
 - Token controls are not legal compliance. A freeze key is not a court order.
