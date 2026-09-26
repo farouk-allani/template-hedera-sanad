@@ -19,7 +19,8 @@ import "hardhat-deploy-ethers";
 
 import generateTsAbis from "./scripts/generateTsAbis";
 
-// Hedera JSON-RPC URL (testnet default). Set HEDERA_RPC_URL in .env for mainnet.
+// What the in-process `hardhat` network forks from. Deploys go through hederaTestnet and
+// hederaMainnet below, whose URLs do not come from here.
 const hederaRpcUrl = process.env.HEDERA_RPC_URL || "https://testnet.hashio.io/api";
 
 // Deployer key: run `yarn hardhat:account:generate` or `yarn hardhat:account:import`,

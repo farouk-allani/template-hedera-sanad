@@ -57,8 +57,30 @@ through `cross-env` so they run the same on Windows, macOS and Linux.
 ## Environment variables
 
 Each package reads its own `.env`, next to its `package.json`. Copy the `.env.example` beside it and
-fill that in; a `.env` at the repository root is not read by anything. The full table lands with the
-variables it documents.
+fill that in; a `.env` at the repository root is not read by anything. The app needs none of these
+to run against the demo sale. Running your own sale needs one: `OPERATOR_KEY`, or an encrypted key.
+
+**`packages/hardhat/.env`**
+
+| Variable | Default | Read by | What it does |
+|---|---|---|---|
+| `OPERATOR_KEY` | none | `sanad:setup`, `sanad:test` | The issuer's ECDSA testnet key, hex or DER. Refused for any network other than testnet. |
+| `DEPLOYER_PRIVATE_KEY_ENCRYPTED` | none | `sanad:*`, `hardhat:deploy`, `hardhat:account` | Written by `yarn hardhat:account:generate` or `yarn hardhat:account:import`, and unlocked with a password. Use it for any key that holds real value. |
+| `HEDERA_RPC_URL` | `https://testnet.hashio.io/api` | `hardhat:test`, `hardhat:chain` | The endpoint the local test network forks from. It does not change where anything is deployed: the `hederaTestnet` and `hederaMainnet` networks have their own URLs in `hardhat.config.ts`. |
+| `HEDERA_MIRROR_TESTNET_URL` | `https://testnet.mirrornode.hedera.com` | `sanad:setup`, `sanad:test` | The mirror node the scripts read accounts, tokens and results from. |
+| `SAUCERSWAP_V1_ROUTER_ID` | `0.0.19264` | `sanad:setup` | The SaucerSwap V1 router the sale swaps through. Setup records it with the deployment. |
+
+**`packages/nextjs/.env`**
+
+| Variable | Default | Read by | What it does |
+|---|---|---|---|
+| `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID` | the scaffold's shared ID | the wallet connectors | Fine on your own machine. Create your own at [cloud.reown.com](https://cloud.reown.com) before you put the app anywhere public. |
+| `NEXT_PUBLIC_HEDERA_TESTNET_RPC_URL` | `https://testnet.hashio.io/api` | contract reads and simulations | The JSON-RPC endpoint the app reads testnet through. Transactions go through the wallet's own RPC. |
+| `HEDERA_MIRROR_TESTNET_URL` | `https://testnet.mirrornode.hedera.com` | `/api/hedera/account` | The server route that shows a connected wallet's account ID. Sanad's screens call the mirror node from the browser, through `MIRROR_NODE_URL` in `utils/sanad/mirror.ts`. |
+
+The scripts set `__RUNTIME_DEPLOYER_PRIVATE_KEY`, `HEDERA_FORKING` and `REPORT_GAS` themselves; do not
+set them by hand. Upstream's hosting helpers also read `NEXT_PUBLIC_IGNORE_BUILD_ERROR`,
+`NEXT_PUBLIC_IPFS_BUILD` and `VERCEL_PROJECT_PRODUCTION_URL`, which Sanad does not need.
 
 ## Architecture
 
