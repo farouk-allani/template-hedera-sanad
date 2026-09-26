@@ -96,7 +96,7 @@ export async function issuer(): Promise<{
     if (!encrypted) {
       throw new Error(
         "No key. Set OPERATOR_KEY in packages/hardhat/.env for testnet, " +
-          "or run `yarn account:generate` / `yarn account:import` for an encrypted one.",
+          "or run `yarn hardhat:account:generate` / `yarn hardhat:account:import` for an encrypted one.",
       );
     }
     const pass = await password({ message: "Enter password to decrypt private key:" });

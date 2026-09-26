@@ -35,7 +35,7 @@ async function main() {
   if (plaintextKey) {
     if (network !== "hederaTestnet") {
       console.error(`🚫 OPERATOR_KEY is a plaintext key and is only accepted for hederaTestnet, not ${network}.`);
-      console.error("   Use an encrypted key (yarn account:import) for any other network.");
+      console.error("   Use an encrypted key (yarn hardhat:account:import) for any other network.");
       process.exit(1);
     }
     console.log("Using OPERATOR_KEY from .env (plaintext, testnet only).");
@@ -44,7 +44,7 @@ async function main() {
     const encryptedKey = process.env.DEPLOYER_PRIVATE_KEY_ENCRYPTED;
     if (!encryptedKey) {
       console.log("🚫️ No key. Set OPERATOR_KEY in packages/hardhat/.env for testnet,");
-      console.log("   or run `yarn account:generate` / `yarn account:import` for an encrypted one.");
+      console.log("   or run `yarn hardhat:account:generate` / `yarn hardhat:account:import` for an encrypted one.");
       return;
     }
     const pass = await password({ message: "Enter password to decrypt private key:" });

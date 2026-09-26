@@ -9,7 +9,9 @@ async function main() {
   const encryptedKey = process.env.DEPLOYER_PRIVATE_KEY_ENCRYPTED;
 
   if (!encryptedKey) {
-    console.log("🚫️ You don't have a deployer account. Run `yarn account:generate` or `yarn account:import` first");
+    console.log(
+      "🚫️ You don't have a deployer account. Run `yarn hardhat:account:generate` or `yarn hardhat:account:import` first",
+    );
     return;
   }
 
