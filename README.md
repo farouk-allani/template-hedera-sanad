@@ -456,11 +456,21 @@ never on the machine that deploys.
 
 ## Sanad, Asset Tokenization Studio and Stablecoin Studio
 
-[Asset Tokenization Studio](https://docs.hedera.com/solutions/tokenization/ats/index) and
-[Stablecoin Studio](https://docs.hedera.com/solutions/tokenization/stablecoin/index) are full
-platforms, with lifecycle management, roles and a UI. Sanad is a template you fork when you want to
-understand and own the whole path, small enough to read in one sitting. If you need a securities
-platform, use the studios.
+[Asset Tokenization Studio](https://docs.hedera.com/solutions/tokenization/ats/index) (ATS) is
+Hedera's platform for issuing and running securities. Its equity and bond tokens are ERC-1400 smart
+contracts with partial ERC-3643 support, and it adds identity and compliance modules, corporate
+actions such as dividends and coupons, and a web UI. Its settlement tools, holds and clearing, lock
+tokens until an escrow agent, a clearing validator or a hash-lock secret releases them.
+
+Sanad does one narrower job: it sells an asset for HBAR. The asset is a native HTS token, so Hedera
+itself, not contract code, enforces its KYC, freeze and pause keys. Payment, conversion and delivery
+happen in one transaction: SaucerSwap turns the buyer's HBAR into the issuer's settlement token, and
+if Hedera refuses the delivery, all of it reverts. Use ATS to issue and administer a security over
+its life; fork Sanad to sell a permissioned HTS token with code you can read in one sitting.
+
+[Stablecoin Studio](https://docs.hedera.com/solutions/tokenization/stablecoin/index) issues
+stablecoins as HTS tokens administered through its own contracts, so one of them can be Sanad's
+settlement token, provided it has a SaucerSwap V1 pool against WHBAR.
 
 ## Testnet evidence
 
