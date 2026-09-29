@@ -26,7 +26,16 @@ export const KEYS_FILE = path.join(ROOT, ".sanad", "testnet.keys.json");
 export const EVIDENCE_FILE = path.join(ROOT, ".sanad", "testnet-run.json");
 
 /** The token keys the demo generates separately, one per role. The treasury is an account, not a key. */
-export type RoleName = "admin" | "kyc" | "freeze" | "pause" | "wipe" | "supply";
+export const ROLES = ["admin", "kyc", "freeze", "pause", "wipe", "supply"] as const;
+export type RoleName = (typeof ROLES)[number];
+
+export type MirrorKey = { _type: string; key: string } | null;
+
+/** A token as the mirror node describes it: the fields the scripts read. */
+export type MirrorToken = { token_id: string; symbol: string; decimals: string; type: string } & Record<
+  `${RoleName}_key`,
+  MirrorKey
+>;
 
 /** An account created with an ECDSA key as its alias, so a browser wallet holding the key can act as it. */
 export interface AccountRef {

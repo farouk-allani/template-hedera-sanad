@@ -11,16 +11,10 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { Client, PublicKey, TopicCreateTransaction, TopicMessageSubmitTransaction } from "@hashgraph/sdk";
-import { hashscan, mirror } from "./hedera";
+import { MirrorKey, MirrorToken, ROLES, RoleName, hashscan, mirror } from "./hedera";
 
 /** Committed with the deployment record, so a fresh scaffold finds the demo's record. */
-export const RECORD_FILE = path.resolve(__dirname, "..", "..", "..", "nextjs", "contracts", "offeringRecord.json");
-
-const KEY_ROLES = ["admin", "kyc", "freeze", "pause", "wipe", "supply"] as const;
-
-type MirrorKey = { _type: string; key: string } | null;
-
-type MirrorToken = { token_id: string; symbol: string } & Record<`${(typeof KEY_ROLES)[number]}_key`, MirrorKey>;
+const RECORD_FILE = path.resolve(__dirname, "..", "..", "..", "nextjs", "contracts", "offeringRecord.json");
 
 /** One sale, as the issuer published it. Amounts are strings because JSON has no 64-bit integers. */
 export type SaleOpened = {
@@ -34,7 +28,7 @@ export type SaleOpened = {
   treasury: string;
   router: string;
   /** SHA-256 of each role key's bytes as the mirror node reports them, or null for no key. */
-  keys: Record<(typeof KEY_ROLES)[number], string | null>;
+  keys: Record<RoleName, string | null>;
 };
 
 type RecordFile = { topicId: string; asset: string };
@@ -104,7 +98,7 @@ export async function recordSaleOpened(
     type: "sanad.sale-opened",
     version: 1,
     ...sale,
-    keys: Object.fromEntries(KEY_ROLES.map(role => [role, fingerprint(token[`${role}_key`])])) as SaleOpened["keys"],
+    keys: Object.fromEntries(ROLES.map(role => [role, fingerprint(token[`${role}_key`])])) as SaleOpened["keys"],
   };
   const receipt = await (
     await new TopicMessageSubmitTransaction().setTopicId(topicId).setMessage(JSON.stringify(message)).execute(client)

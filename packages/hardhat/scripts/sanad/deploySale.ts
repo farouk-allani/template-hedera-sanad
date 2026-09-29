@@ -19,6 +19,7 @@ import hre from "hardhat";
 import { AccountId, Client, PublicKey, TokenId, TransferTransaction } from "@hashgraph/sdk";
 import generateTsAbis from "../generateTsAbis";
 import {
+  MirrorToken,
   SAUCERSWAP_V1_ROUTER_ID,
   contractEvmAddress,
   contractIdOf,
@@ -32,14 +33,6 @@ import { recordSaleOpened } from "./offeringRecord";
 
 const ROUTER_ABI = ["function factory() view returns (address)", "function whbar() view returns (address)"];
 const FACTORY_ABI = ["function getPair(address, address) view returns (address)"];
-
-type MirrorToken = {
-  token_id: string;
-  symbol: string;
-  decimals: string;
-  type: string;
-  kyc_key: object | null;
-};
 
 /** A setting or on-chain state that stops the deployment. Printed as a message, not a stack trace. */
 class Refusal extends Error {}

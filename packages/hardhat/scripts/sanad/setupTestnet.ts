@@ -37,6 +37,7 @@ import {
   DEPLOYMENT_FILE,
   Deployment,
   KEYS_FILE,
+  ROLES,
   RoleName,
   SAUCERSWAP_V1_ROUTER_ID,
   StoredKeys,
@@ -65,8 +66,6 @@ const CONFIG = {
   buyerFundingHbar: 30,
   complianceFundingHbar: 5, // an approval or revocation costs about 0.04 HBAR
 };
-
-const ROLES: RoleName[] = ["admin", "kyc", "freeze", "pause", "wipe", "supply"];
 
 const ROUTER_ABI = [
   "function factory() view returns (address)",
