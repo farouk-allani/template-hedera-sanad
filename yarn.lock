@@ -4195,13 +4195,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openzeppelin/contracts@npm:5.6.1":
-  version: 5.6.1
-  resolution: "@openzeppelin/contracts@npm:5.6.1"
-  checksum: 4a1c1d3f7f59b821cc16661faf16d0d723c7e4d83cad2717c7c9f75c3006e724db28bd27c8a14bebe17c5d29838d12d8e9428675d2892b4e719105ecd0628d58
-  languageName: node
-  linkType: hard
-
 "@paulmillr/qr@npm:^0.2.1":
   version: 0.2.1
   resolution: "@paulmillr/qr@npm:0.2.1"
@@ -4778,7 +4771,6 @@ __metadata:
     "@nomicfoundation/hardhat-ethers": ~3.0.8
     "@nomicfoundation/hardhat-network-helpers": ~1.0.11
     "@nomicfoundation/hardhat-verify": ^2.0.0
-    "@openzeppelin/contracts": 5.6.1
     "@typechain/ethers-v6": ~0.5.1
     "@typechain/hardhat": ~9.1.0
     "@types/eslint": ~9.6.1
@@ -4840,7 +4832,6 @@ __metadata:
     next-themes: ^0.4.6
     postcss: ^8.4.45
     prettier: ^3.5.3
-    qrcode.react: ^4.0.1
     react: ^19.2.3
     react-dom: ^19.2.3
     react-hot-toast: ^2.4.0
@@ -17201,15 +17192,6 @@ __metadata:
   bin:
     qrcode-terminal: ./bin/qrcode-terminal.js
   checksum: 51638d11d080e06ef79ef2d5cfe911202159e48d2873d6a80a3c5489b4b767acf4754811ceba4e113db8f41f61a06c163bcb17e6e18e6b34e04a7a5155dac974
-  languageName: node
-  linkType: hard
-
-"qrcode.react@npm:^4.0.1":
-  version: 4.2.0
-  resolution: "qrcode.react@npm:4.2.0"
-  peerDependencies:
-    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: fe7f496bb3696eedf4113390c6feda386e7a5e5d69d12fcc2489c55ecec467f682dc99b0d8085afbeb8ed3962c1f7554b26225cd78b72e78416f9506abbebd5d
   languageName: node
   linkType: hard
 

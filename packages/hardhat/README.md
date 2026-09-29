@@ -19,9 +19,7 @@ one fails: the forking plugin does not emulate the Token Service's KYC, freeze a
 delivery refused with 176, 165 or 265 only happens on testnet. That is what `sanad:test` is for.
 
 `SanadSale` has no `deploy/` script, because its constructor reads the live SaucerSwap router, which
-a local node does not have; `sanad:setup` deploys it. `yarn hardhat:chain` and
-`yarn hardhat:deploy --network localhost` still work for Scaffold-HBAR's example contracts, and the
-CI workflow uses them.
+a local node does not have. `sanad:setup` and `sanad:deploy` deploy it.
 
 The key the Sanad scripts sign with is `OPERATOR_KEY` or the encrypted key, both described under
 "Environment variables" in the repository README.

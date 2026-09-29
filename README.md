@@ -146,8 +146,6 @@ switch to change them, so the terms a buyer sees cannot be edited underneath the
 - `test/SanadSale.test.ts` is the local suite (`yarn hardhat:test`, no HBAR);
   `test-testnet/SanadSale.acceptance.ts` is the testnet suite (`yarn sanad:test`).
 - `deployments/hederaTestnet/SanadSale.json` records the sale the app points at.
-- `HederaToken.sol`, `HtsTokenCreator.sol`, `deploy/` and their tests are Scaffold-HBAR's own
-  examples, as upstream ships them. Sanad does not use them.
 
 **`packages/nextjs`**
 

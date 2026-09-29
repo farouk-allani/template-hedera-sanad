@@ -50,8 +50,8 @@ someone's money, so do not "simplify" any of them without being asked.
 - Deploying the sale: `packages/hardhat/scripts/sanad/`. `setupTestnet.ts` (`yarn sanad:setup`)
   builds a whole demo; `deploySale.ts` (`yarn sanad:deploy`) deploys a sale for tokens that already
   exist. Both publish each sale to the asset's offering record, an HCS topic (`offeringRecord.ts`),
-  whose ID they write to `packages/nextjs/contracts/offeringRecord.json`.
-  `packages/hardhat/deploy/` holds only Scaffold-HBAR's example contracts.
+  whose ID they write to `packages/nextjs/contracts/offeringRecord.json`. There is no `deploy/`
+  script: the sale's constructor reads the live SaucerSwap router, which a local node does not have.
 - Tests: `packages/hardhat/test/`
 - Hardhat config and networks: `packages/hardhat/hardhat.config.ts`
 - Frontend config and networks: `packages/nextjs/scaffold.config.ts` (Hedera testnet only; the sale
@@ -174,7 +174,6 @@ both if you rebrand.
 | `UpperCamelCase` | class, interface, type, enum, decorator, type parameter, TSX component |
 | `lowerCamelCase` | variable, parameter, function, property, module alias                  |
 | `CONSTANT_CASE`  | constants and global variables                                         |
-| `snake_case`     | hardhat deploy filenames                                               |
 
 - Import with the `~~` alias in the nextjs package: `import { x } from "~~/hooks/scaffold-hbar"`.
 - Prefer `type` over `interface`; no `T` prefix on type names.
