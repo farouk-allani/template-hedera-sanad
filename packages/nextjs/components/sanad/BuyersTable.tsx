@@ -8,7 +8,7 @@ import type { TokenRelationship } from "~~/utils/sanad/mirror";
  * An account's standing with the asset. The mirror node reports "never approved" and "approved,
  * then revoked" alike as REVOKED, so both read "Not approved".
  */
-export const ApprovalBadge = ({ relationship }: { relationship?: TokenRelationship }) => {
+const ApprovalBadge = ({ relationship }: { relationship?: TokenRelationship }) => {
   if (!relationship) return <span className="badge badge-ghost">Not associated</span>;
   if (relationship.freeze_status === "FROZEN") return <span className="badge badge-error">Frozen</span>;
   if (relationship.kyc_status === "GRANTED") return <span className="badge badge-success">Approved</span>;

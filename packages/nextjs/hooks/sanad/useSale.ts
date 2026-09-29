@@ -22,7 +22,7 @@ export type Sale = {
   inventory?: number;
 };
 
-export type SaleState = { status: "loading" } | { status: "missing" } | { status: "ready"; sale: Sale };
+type SaleState = { status: "loading" } | { status: "missing" } | { status: "ready"; sale: Sale };
 
 /**
  * The deployed sale. Its terms are immutable in the contract, so they are read once; the token's

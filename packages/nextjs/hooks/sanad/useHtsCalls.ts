@@ -3,7 +3,7 @@ import { usePublicClient, useWriteContract } from "wagmi";
 import { HIP719_ABI, HTS_ADDRESS, HTS_KYC_ABI } from "~~/utils/sanad/hts";
 import { waitForContractResult } from "~~/utils/sanad/mirror";
 
-export type HtsCallOutcome = {
+type HtsCallOutcome = {
   hash: Hex;
   /** The transaction's own result on the mirror node, e.g. SUCCESS or INSUFFICIENT_GAS. */
   result: string;

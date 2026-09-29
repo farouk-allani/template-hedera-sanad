@@ -3,7 +3,7 @@
  * holds which key, who is associated) is readable here and nowhere else, so the app reads it here
  * rather than through contract calls.
  */
-export const MIRROR_NODE_URL = "https://testnet.mirrornode.hedera.com";
+const MIRROR_NODE_URL = "https://testnet.mirrornode.hedera.com";
 
 export type MirrorKey = { _type: string; key: string } | null;
 
@@ -46,7 +46,7 @@ export type MirrorLog = {
   index: number;
 };
 
-export type MirrorContractResult = {
+type MirrorContractResult = {
   result: string;
   call_result: `0x${string}` | null;
 };
