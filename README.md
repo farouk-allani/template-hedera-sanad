@@ -83,7 +83,6 @@ to run against the demo sale. Running your own sale needs one: `OPERATOR_KEY`, o
 |---|---|---|---|
 | `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID` | the scaffold's shared ID | the wallet connectors | Fine on your own machine. Create your own at [cloud.reown.com](https://cloud.reown.com) before you put the app anywhere public. |
 | `NEXT_PUBLIC_HEDERA_TESTNET_RPC_URL` | `https://testnet.hashio.io/api` | contract reads and simulations | The JSON-RPC endpoint the app reads testnet through. Transactions go through the wallet's own RPC. |
-| `HEDERA_MIRROR_TESTNET_URL` | `https://testnet.mirrornode.hedera.com` | `/api/hedera/account` | The server route that shows a connected wallet's account ID. Sanad's screens call the mirror node from the browser, through `MIRROR_NODE_URL` in `utils/sanad/mirror.ts`. |
 
 The scripts set `__RUNTIME_DEPLOYER_PRIVATE_KEY`, `HEDERA_FORKING` and `REPORT_GAS` themselves; do not
 set them by hand. Upstream's hosting helpers also read `NEXT_PUBLIC_IGNORE_BUILD_ERROR`,
