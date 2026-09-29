@@ -7,10 +7,7 @@ import { AbiCoder, Interface, Wallet } from "ethers";
 import password from "@inquirer/password";
 
 /** Mirror node REST base. Reads come from here, so they lag consensus by a moment. */
-export const MIRROR = (process.env.HEDERA_MIRROR_TESTNET_URL ?? "https://testnet.mirrornode.hedera.com").replace(
-  /\/$/,
-  "",
-);
+const MIRROR = (process.env.HEDERA_MIRROR_TESTNET_URL ?? "https://testnet.mirrornode.hedera.com").replace(/\/$/, "");
 
 /** SaucerSwap V1 router (RouterV3) on testnet, per docs.saucerswap.finance/developers/contracts. */
 export const SAUCERSWAP_V1_ROUTER_ID = process.env.SAUCERSWAP_V1_ROUTER_ID ?? "0.0.19264";
@@ -61,7 +58,7 @@ export interface Deployment {
 /** Private keys for the demo role holders and buyers. Testnet throwaways. */
 export type StoredKeys = Partial<Record<RoleName | "buyer.approved" | "buyer.unapproved", string>>;
 
-export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export function readJson<T>(file: string): T {
   if (!fs.existsSync(file)) throw new Error(`${path.basename(file)} not found. Run \`yarn sanad:setup\` first.`);
