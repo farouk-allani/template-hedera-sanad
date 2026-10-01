@@ -110,10 +110,10 @@ flowchart LR
   sale -- "delivery" --> hts
 ```
 
-There is no server. The app reads the sale's terms and the live quote from the contract, and
-everything the token decides (who is approved or frozen, whether it is paused, who holds which key,
-who has associated) from the mirror node, because the contract knows none of it. Every change is a
-transaction the connected wallet signs.
+There is no server. The app reads the sale's terms and the live quote from the contract. It reads
+everything the token decides from the mirror node, because the contract knows none of it: who is
+approved or frozen, whether the token is paused, who holds which key, who has associated. Every
+change is a transaction the connected wallet signs.
 
 | Part of Hedera | What Sanad uses it for |
 |---|---|
@@ -399,10 +399,13 @@ committed: the contract list is rebuilt from `deployments/` on every deploy, and
 record disappears from the app. The app manages one sale at a time, so withdraw a sale's unsold
 inventory from `/issuer` before you replace it.
 
-**What not to change.** `AGENTS.md` lists the invariants that keep the sale correct, among them:
-every Token Service response code is checked, the contract never checks KYC itself, settlement and
-delivery stay in one transaction, aliased accounts are addressed by their alias, and unsold
-inventory can always be withdrawn.
+**What not to change.** `AGENTS.md` lists the invariants that keep the sale correct. Among them:
+
+- every Token Service response code is checked;
+- the contract never checks KYC itself;
+- settlement and delivery stay in one transaction;
+- aliased accounts are addressed by their alias;
+- unsold inventory can always be withdrawn.
 
 ### Running it on mainnet
 
