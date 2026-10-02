@@ -501,6 +501,15 @@ settlement token, provided it has a SaucerSwap V1 pool against WHBAR.
 
 ## Testnet evidence
 
+**Reproduced from scratch on 2 October 2026.** A new account scaffolded this repository from GitHub
+and followed [Try it on testnet](#try-it-on-testnet): `sanad:setup` built a new sale,
+[`0.0.10825215`](https://hashscan.io/testnet/contract/0.0.10825215), in 68 seconds, and the
+acceptance suite passed 10 of 10 against it, including
+[the purchase](https://testnet.mirrornode.hedera.com/api/v1/contracts/results/0x2c7e9f05aa997dee5e41c3c58f59d66474c973bc79a09a499e8307c4d1bfd1c4)
+and [the refusal without KYC](https://testnet.mirrornode.hedera.com/api/v1/contracts/results/0x0c07a944ff915e20311add7a54557b0c2f1fc951deebb87e53875c6483088264).
+That run also found the relay fee problem under [Troubleshooting](#troubleshooting); the suite now
+prices around it.
+
 The acceptance suite on Hedera testnet, 22 and 23 September 2026, against one deployment: sale
 contract [`0.0.10667622`](https://hashscan.io/testnet/contract/0.0.10667622), asset `SDFU`
 [`0.0.10667614`](https://hashscan.io/testnet/token/0.0.10667614), settlement `sUSD`
