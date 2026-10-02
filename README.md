@@ -9,6 +9,9 @@
 
 Sell a **permissioned** asset on Hedera for HBAR, in a single transaction.
 
+**Demo:** [a 3½-minute walkthrough on testnet](https://youtu.be/kTBw6QtNa-4): association, approval,
+a purchase, and a refused delivery that settles nothing.
+
 The buyer pays HBAR. SaucerSwap V1 converts exactly enough of it into the issuer's settlement
 token and pays the issuer. The asset is then delivered from the sale contract's inventory, and the
 Hedera Token Service decides whether that delivery is allowed using the token's own KYC, freeze and
