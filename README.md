@@ -1,5 +1,11 @@
 # Sanad
 
+[![Licence: MIT](https://img.shields.io/github/license/farouk-allani/template-hedera-sanad)](LICENCE)
+[![Node 20.18.3 or later](https://img.shields.io/badge/node-%E2%89%A5%2020.18.3-339933)](https://nodejs.org/)
+[![Solidity 0.8.28](https://img.shields.io/badge/solidity-0.8.28-363636)](packages/hardhat/contracts/SanadSale.sol)
+[![Evidence on Hedera testnet](https://img.shields.io/badge/evidence-Hedera%20testnet-2ea44f)](#testnet-evidence)
+[![A Scaffold-HBAR template](https://img.shields.io/badge/Scaffold--HBAR-template-8259ef)](https://github.com/hedera-dev/scaffold-hbar)
+
 Sell a **permissioned** asset on Hedera for HBAR, in a single transaction.
 
 The buyer pays HBAR. SaucerSwap V1 converts exactly enough of it into the issuer's settlement
@@ -13,6 +19,14 @@ independent project, built on Hedera; it is not affiliated with, sponsored or en
 Hashgraph, LLC.
 
 ![A purchase on the live testnet demo: the buyer associated and was approved, then bought one unit. The receipt shows the pool took 1.1967 HBAR, 0.012 HBAR came back, and the issuer received 10 sUSD, all in one transaction.](docs/images/buy.png)
+
+**Contents:** [Quickstart](#quickstart) · [Environment variables](#environment-variables) ·
+[Architecture](#architecture) · [Try it on testnet](#try-it-on-testnet) ·
+[The purchase flow](#the-purchase-flow) · [Guarantees](#what-is-guaranteed-and-by-whom) ·
+[Key custody](#key-custody) · [Hedera traps](#hedera-traps-this-template-handles) ·
+[Customising](#customising-it-for-your-asset) · [Mainnet](#running-it-on-mainnet) ·
+[Honest limits](#honest-limits) · [Testnet evidence](#testnet-evidence) ·
+[Troubleshooting](#troubleshooting)
 
 ## Who this is for
 
