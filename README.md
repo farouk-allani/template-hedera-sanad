@@ -1,5 +1,6 @@
 # Sanad
 
+[![Lint](https://github.com/farouk-allani/template-hedera-sanad/actions/workflows/lint.yaml/badge.svg?branch=main)](https://github.com/farouk-allani/template-hedera-sanad/actions/workflows/lint.yaml)
 [![Licence: MIT](https://img.shields.io/github/license/farouk-allani/template-hedera-sanad)](LICENCE)
 [![Node 20.18.3 or later](https://img.shields.io/badge/node-%E2%89%A5%2020.18.3-339933)](https://nodejs.org/)
 [![Solidity 0.8.28](https://img.shields.io/badge/solidity-0.8.28-363636)](packages/hardhat/contracts/SanadSale.sol)
