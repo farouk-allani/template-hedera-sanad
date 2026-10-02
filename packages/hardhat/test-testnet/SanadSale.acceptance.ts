@@ -60,6 +60,16 @@ const HTS_KYC = [
 const GAS_LIMIT = 1_500_000n;
 const UNITS = 2n;
 
+/**
+ * Fees for a transaction a local Wallet signs. An ethers Wallet prices from the latest block, and
+ * Hashio reports some blocks' base fee in tinybars, so about every other transaction offered 160 wei
+ * and was refused with -32009. `eth_gasPrice` is consistent; Hashio's own maxFeePerGas is twice it.
+ */
+async function fees() {
+  const gasPrice = BigInt(await ethers.provider.send("eth_gasPrice", []));
+  return { maxFeePerGas: 2n * gasPrice };
+}
+
 const ERC20 = ["function balanceOf(address) view returns (uint256)"];
 const PAIR = [
   "function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)",
@@ -140,6 +150,7 @@ describe("SanadSale on testnet: HBAR in, exact settlement out, permissioned deli
     const tx = (await sale.connect(from).getFunction("buy")(UNITS, deadline, {
       value: budgetTinybars * WEIBAR_PER_TINYBAR,
       gasLimit: GAS_LIMIT,
+      ...(await fees()),
     })) as ContractTransactionResponse;
     const receipt = await tx.wait().catch(() => null); // several tests expect a revert
     const result = await waitForContractResult(tx.hash);
@@ -160,7 +171,10 @@ describe("SanadSale on testnet: HBAR in, exact settlement out, permissioned deli
    */
   async function kycCall(from: Wallet, fn: "grantTokenKyc" | "revokeTokenKyc", account: string, label: string) {
     const hts = new ethers.Contract(HTS, HTS_KYC, from);
-    const tx = (await hts.getFunction(fn)(d.asset, account, { gasLimit: 200_000 })) as ContractTransactionResponse;
+    const tx = (await hts.getFunction(fn)(d.asset, account, {
+      gasLimit: 200_000,
+      ...(await fees()),
+    })) as ContractTransactionResponse;
     await tx.wait().catch(() => null);
     const result = await waitForContractResult(tx.hash);
     const returned = result.call_result ? BigInt(result.call_result) : undefined;
@@ -297,9 +311,10 @@ describe("SanadSale on testnet: HBAR in, exact settlement out, permissioned deli
     const inventoryBefore = (await asset.balanceOf(d.sanad)) as bigint;
 
     for (const call of [
-      () => asStranger.getFunction("associateAsset")({ gasLimit: 400_000 }),
-      () => asStranger.getFunction("withdrawInventory")(unapproved.address, 1, { gasLimit: 400_000 }),
-      () => asStranger.getFunction("sweepHbar")(unapproved.address, { gasLimit: 400_000 }),
+      async () => asStranger.getFunction("associateAsset")({ gasLimit: 400_000, ...(await fees()) }),
+      async () =>
+        asStranger.getFunction("withdrawInventory")(unapproved.address, 1, { gasLimit: 400_000, ...(await fees()) }),
+      async () => asStranger.getFunction("sweepHbar")(unapproved.address, { gasLimit: 400_000, ...(await fees()) }),
     ]) {
       const tx = (await call()) as ContractTransactionResponse;
       await tx.wait().catch(() => null);
