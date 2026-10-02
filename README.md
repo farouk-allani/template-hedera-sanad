@@ -79,21 +79,21 @@ demo sale; your own sale needs `OPERATOR_KEY` or an encrypted key.
 
 **`packages/hardhat/.env`**
 
-| Variable | Default | Read by | What it does |
-|---|---|---|---|
-| `OPERATOR_KEY` | none | `sanad:setup`, `sanad:deploy`, `sanad:test` | The issuer's ECDSA testnet key, hex or DER. Refused for any other network. |
-| `DEPLOYER_PRIVATE_KEY_ENCRYPTED` | none | `sanad:*`, `hardhat:deploy`, `hardhat:account` | Written by `yarn hardhat:account:generate` or `yarn hardhat:account:import`, unlocked with a password. Use it for any key that holds real value. |
-| `HEDERA_RPC_URL` | `https://testnet.hashio.io/api` | `hardhat:test`, `hardhat:chain` | What the local test network forks from. It does not change where anything is deployed. |
-| `HEDERA_MIRROR_TESTNET_URL` | `https://testnet.mirrornode.hedera.com` | `sanad:setup`, `sanad:deploy`, `sanad:test` | The mirror node the scripts read. |
-| `SAUCERSWAP_V1_ROUTER_ID` | `0.0.19264` | `sanad:setup`, `sanad:deploy` | The SaucerSwap V1 router the sale swaps through. |
-| `SANAD_ASSET_ID`, `SANAD_SETTLEMENT_ID`, `SANAD_PRICE`, `SANAD_INVENTORY`, `SANAD_TREASURY` | none | `sanad:deploy` | A sale for tokens you already have. See [Customising it for your asset](#customising-it-for-your-asset). |
+| Variable | What it does |
+|---|---|
+| `OPERATOR_KEY` | The issuer's ECDSA testnet key, hex or DER, for `sanad:setup`, `sanad:deploy` and `sanad:test`. Refused for any other network. |
+| `DEPLOYER_PRIVATE_KEY_ENCRYPTED` | Written by `yarn hardhat:account:generate` or `yarn hardhat:account:import`, and unlocked with a password by `sanad:*`, `hardhat:deploy` and `hardhat:account`. Use it for any key that holds real value. |
+| `HEDERA_RPC_URL` | What the local test network (`hardhat:test`, `hardhat:chain`) forks from. It does not change where anything is deployed. Default: [Hashio's testnet relay](https://testnet.hashio.io/api) |
+| `HEDERA_MIRROR_TESTNET_URL` | The mirror node the `sanad:*` scripts read. Default: [Hedera's testnet mirror node](https://testnet.mirrornode.hedera.com) |
+| `SAUCERSWAP_V1_ROUTER_ID` | The SaucerSwap V1 router that `sanad:setup` and `sanad:deploy` give the sale. Default: `0.0.19264` |
+| `SANAD_ASSET_ID`, `SANAD_SETTLEMENT_ID`, `SANAD_PRICE`, `SANAD_INVENTORY`, `SANAD_TREASURY` | A sale for tokens you already have, for `sanad:deploy`. See [Customising it for your asset](#customising-it-for-your-asset). |
 
 **`packages/nextjs/.env`**
 
-| Variable | Default | Read by | What it does |
-|---|---|---|---|
-| `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID` | the scaffold's shared ID | the wallet connectors | Fine locally. Create your own at [cloud.reown.com](https://cloud.reown.com) before you put the app anywhere public. |
-| `NEXT_PUBLIC_HEDERA_TESTNET_RPC_URL` | `https://testnet.hashio.io/api` | contract reads and simulations | Transactions go through the wallet's own RPC. |
+| Variable | What it does |
+|---|---|
+| `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID` | The wallet connectors' project. The scaffold's shared ID is the default and fine locally; create your own at [cloud.reown.com](https://cloud.reown.com) before you put the app anywhere public. |
+| `NEXT_PUBLIC_HEDERA_TESTNET_RPC_URL` | The relay for contract reads and simulations; transactions go through the wallet's own RPC. Default: [Hashio's testnet relay](https://testnet.hashio.io/api) |
 
 The scripts set `__RUNTIME_DEPLOYER_PRIVATE_KEY`, `HEDERA_FORKING` and `REPORT_GAS` themselves.
 
@@ -433,27 +433,37 @@ Mainnet values, read from the chain on 26 September 2026:
 |---|---|---|
 | SaucerSwap V1 router | `0.0.3045981` | `0.0.19264` |
 | WHBAR token, what the router's `whbar()` returns | `0.0.1456986` | `0.0.15058` |
-| Mirror node | `https://mainnet.mirrornode.hedera.com` | `https://testnet.mirrornode.hedera.com` |
-| JSON-RPC relay, chain ID | `https://mainnet.hashio.io/api`, 295 | `https://testnet.hashio.io/api`, 296 |
-| HashScan | `https://hashscan.io/mainnet` | `https://hashscan.io/testnet` |
+| Chain ID | 295 | 296 |
+
+The URLs differ only in the network's name: on mainnet the mirror node is
+`https://mainnet.mirrornode.hedera.com`, the JSON-RPC relay `https://mainnet.hashio.io/api` and
+HashScan `https://hashscan.io/mainnet`.
 
 Hedera's documentation describes Hashio as a beta for testing, so use a production relay. Native
 USDC (`0.0.456858`, 6 decimals, no KYC key) has a V1 pool against WHBAR, about 2.85 million WHBAR
 and 269,000 USDC that day; USDT0 (`0.0.10282787`) has none. USDC has a freeze key: if its issuer
 froze your treasury, every purchase would revert at the payout.
 
-What has to change, all of it configuration:
+What has to change, all of it configuration.
 
-| Where | What |
-|---|---|
-| `packages/nextjs/scaffold.config.ts` | `targetNetworks` to `[chains.hedera]`, and `rpcOverrides` to your mainnet relay |
-| `packages/nextjs/utils/sanad/mirror.ts` | `MIRROR_NODE_URL` |
-| `packages/nextjs/utils/sanad/format.ts` | `HASHSCAN_URL` |
-| `packages/nextjs/components/ScaffoldHbarAppWithProviders.tsx`, `components/sanad/SaleGate.tsx` | `hederaTestnet` to `hedera` |
-| `app/page.tsx`, `app/buy/_components/BuyFlow.tsx`, `app/issuer/_components/BuyersPanel.tsx`, `components/sanad/SaleGate.tsx` | text that says "Hedera Testnet" or sends buyers to the faucet |
-| `packages/hardhat/scripts/sanad/hedera.ts` | `Client.forTestnet()` in `issuer()`, and the `hashscan` helper. `HEDERA_MIRROR_TESTNET_URL` and `SAUCERSWAP_V1_ROUTER_ID` take the mainnet values from `.env`; only their names say testnet |
-| `packages/hardhat/package.json` | a copy of `sanad:deploy` with `--network hederaMainnet`. Never `sanad:setup`, which mints demo tokens and seeds a pool with your HBAR |
-| `packages/hardhat/.gitignore` | un-ignore `deployments/hederaMainnet/` as `hederaTestnet` is, or the next deploy drops the sale from the app |
+In `packages/nextjs`:
+
+- `scaffold.config.ts`: `targetNetworks` to `[chains.hedera]`, and `rpcOverrides` to your mainnet relay.
+- `utils/sanad/mirror.ts`: `MIRROR_NODE_URL`. `utils/sanad/format.ts`: `HASHSCAN_URL`.
+- `components/ScaffoldHbarAppWithProviders.tsx` and `components/sanad/SaleGate.tsx`: `hederaTestnet`
+  to `hedera`.
+- `app/page.tsx`, `app/buy/_components/BuyFlow.tsx`, `app/issuer/_components/BuyersPanel.tsx` and
+  `components/sanad/SaleGate.tsx`: text that says "Hedera Testnet" or sends buyers to the faucet.
+
+In `packages/hardhat`:
+
+- `scripts/sanad/hedera.ts`: `Client.forTestnet()` in `issuer()`, and the `hashscan` helper.
+  `HEDERA_MIRROR_TESTNET_URL` and `SAUCERSWAP_V1_ROUTER_ID` take the mainnet values from `.env`; only
+  their names say testnet.
+- `package.json`: a copy of `sanad:deploy` with `--network hederaMainnet`. Never `sanad:setup`, which
+  mints demo tokens and seeds a pool with your HBAR.
+- `.gitignore`: un-ignore `deployments/hederaMainnet/` as `hederaTestnet` is, or the next deploy
+  drops the sale from the app.
 
 Keys matter most. `OPERATOR_KEY` is refused off testnet; use `yarn hardhat:account:import`, which
 keeps the key encrypted. The deploying account owns the sale and can withdraw all its inventory. The
@@ -534,22 +544,22 @@ no admin key and the issuer's key as submit key
 
 Every one of these was hit while building or testing Sanad.
 
-| What you see | Why | What to do |
-|---|---|---|
-| The new project is plain Scaffold-HBAR, or the CLI stops on a Foundry version check | `npm create` ran without `--` before `--template`, so npm kept the flag | Scaffold again with `-- --template farouk-allani/template-hedera-sanad`, or use `npx create-scaffold-hbar@latest` |
-| `corepack enable` fails with a permission error on Windows | It writes next to Node, in Program Files | Run it from an administrator shell, or pass `--install-directory` with a folder on your `PATH`, such as `%APPDATA%\npm` |
-| A plain `npm install` fails with `ERESOLVE` about `@nomicfoundation/hardhat-verify` | A peer range inherited from upstream; the scaffold CLI installs with `--legacy-peer-deps` | `npm install --legacy-peer-deps` |
-| `OPERATOR_KEY is an ED25519 key` | EVM transactions need an ECDSA (secp256k1) key | Create an ECDSA account on the Portal and use its key |
-| `sanad:setup` stopped partway, for example out of HBAR | Each paid step is recorded in `packages/hardhat/.sanad/testnet.partial.json` as it succeeds | Top up and run it again; it resumes without paying twice. Deleting that file starts over |
-| `Gas price '…' is below configured minimum gas price` (`-32009`) | The public relay reports some blocks' base fee in tinybars, so a wallet that prices from the latest block offers too little. The app sends no fee of its own; the scripts price from `eth_feeHistory` and the acceptance suite from `eth_gasPrice` | Send it again. If your wallet keeps doing it, set its gas price to what `eth_gasPrice` returns |
-| A `[DEP0190] DeprecationWarning` about `shell` on Windows | Node 24 flags how the scripts start hardhat | Nothing; it is a warning |
-| **No sale found on Hedera Testnet** | Nothing is deployed at the address the app points at, usually after a testnet reset | `yarn sanad:setup` or `yarn sanad:deploy` points the app at a new sale |
-| `/buy` says your address **has no Hedera account yet** | An EVM address becomes an account when HBAR first arrives | Send it HBAR from the [faucet](https://portal.hedera.com/faucet) |
-| `/issuer` offers no **Approve** button | The connected wallet is not the KYC key's account; the console names the one that is | Connect it; in the demo it is the `kyc` key from `.sanad/testnet.keys.json` |
-| The console approved you, but `/buy` still waits | The mirror node trails consensus; `/buy` checks every ten seconds | Wait for the next check |
-| A notice on `/buy` instead of a purchase | The page checks your standing and the pool, and simulates the purchase, before you sign | The notice says why: frozen, paused, pool too small for the order, price past your tolerance, or quote expired |
-| **Not in the issuer's offering record** | Nobody published the sale the app points at: `sanad:deploy` stopped before stocking it, or the record file names another asset's topic | Finish with `yarn sanad:deploy`. If you did not deploy the sale, ask its issuer before buying |
-| `sanad:deploy` stops at **Waiting for the holder of the KYC key** | The sale contract needs approving like any holder | Approve it from the printed link, then run it again |
+| What you see | Why, and what to do |
+|---|---|
+| The new project is plain Scaffold-HBAR, or the CLI stops on a Foundry version check | `npm create` ran without `--` before `--template`, so npm kept the flag. Scaffold again with `-- --template farouk-allani/template-hedera-sanad`, or use `npx create-scaffold-hbar@latest`. |
+| `corepack enable` fails with a permission error on Windows | It writes next to Node, in Program Files. Run it from an administrator shell, or pass `--install-directory` with a folder on your `PATH`, such as `%APPDATA%\npm`. |
+| A plain `npm install` fails with `ERESOLVE` about `@nomicfoundation/hardhat-verify` | A peer range inherited from upstream; the scaffold CLI installs with `--legacy-peer-deps`. Install the same way: `npm install --legacy-peer-deps`. |
+| `OPERATOR_KEY is an ED25519 key` | EVM transactions need an ECDSA (secp256k1) key. Create an ECDSA account on the Portal and use its key. |
+| `sanad:setup` stopped partway, for example out of HBAR | Each paid step is recorded in `.sanad/testnet.partial.json` in `packages/hardhat` as it succeeds. Top up and run it again; it resumes without paying twice. Deleting that file starts over. |
+| `Gas price '…' is below configured minimum gas price` (`-32009`) | The public relay reports some blocks' base fee in tinybars, so a wallet that prices from the latest block offers too little. The app sends no fee of its own; the scripts price from `eth_feeHistory` and the acceptance suite from `eth_gasPrice`. Send it again. If your wallet keeps doing it, set its gas price to what `eth_gasPrice` returns. |
+| A `[DEP0190] DeprecationWarning` about `shell` on Windows | Node 24 flags how the scripts start hardhat. It is only a warning. |
+| **No sale found on Hedera Testnet** | Nothing is deployed at the address the app points at, usually after a testnet reset. `yarn sanad:setup` or `yarn sanad:deploy` points the app at a new sale. |
+| `/buy` says your address **has no Hedera account yet** | An EVM address becomes an account when HBAR first arrives. Send it HBAR from the [faucet](https://portal.hedera.com/faucet). |
+| `/issuer` offers no **Approve** button | The connected wallet is not the KYC key's account; the console names the one that is. Connect it; in the demo it is the `kyc` key from `.sanad/testnet.keys.json`. |
+| The console approved you, but `/buy` still waits | The mirror node trails consensus; `/buy` checks every ten seconds. Wait for the next check. |
+| A notice on `/buy` instead of a purchase | The page checks your standing and the pool, and simulates the purchase, before you sign. The notice says why: frozen, paused, pool too small for the order, price past your tolerance, or quote expired. |
+| **Not in the issuer's offering record** | Nobody published the sale the app points at: `sanad:deploy` stopped before stocking it, or the record file names another asset's topic. Finish with `yarn sanad:deploy`. If you did not deploy the sale, ask its issuer before buying. |
+| `sanad:deploy` stops at **Waiting for the holder of the KYC key** | The sale contract needs approving like any holder. Approve it from the printed link, then run it again. |
 
 ## Licence
 
