@@ -1,5 +1,6 @@
 # Sanad
 
+[![Scaffold](https://github.com/farouk-allani/template-hedera-sanad/actions/workflows/scaffold.yaml/badge.svg?branch=main)](https://github.com/farouk-allani/template-hedera-sanad/actions/workflows/scaffold.yaml)
 [![Lint](https://github.com/farouk-allani/template-hedera-sanad/actions/workflows/lint.yaml/badge.svg?branch=main)](https://github.com/farouk-allani/template-hedera-sanad/actions/workflows/lint.yaml)
 [![Licence: MIT](https://img.shields.io/github/license/farouk-allani/template-hedera-sanad)](LICENCE)
 [![Node 20.18.3 or later](https://img.shields.io/badge/node-%E2%89%A5%2020.18.3-339933)](https://nodejs.org/)
@@ -63,7 +64,9 @@ buying needs the sale's compliance wallet to approve you, which is the point. To
 deploy your own sale: see [Try it on testnet](#try-it-on-testnet).
 
 Yarn is the default; `--package-manager npm` works too, and the scripts behave the same on Windows,
-macOS and Linux.
+macOS and Linux. Every push is scaffolded this way from GitHub, on Node 20 and 24 with Yarn and npm,
+then linted, type-checked, compiled, tested, built and booted: see the
+[Scaffold workflow](.github/workflows/scaffold.yaml).
 
 ## Prerequisites
 
