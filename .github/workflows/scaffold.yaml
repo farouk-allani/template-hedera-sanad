@@ -1,0 +1,73 @@
+name: Scaffold
+
+# Scaffolds the pushed commit from GitHub with the README's own command, then lints, type-checks,
+# compiles, runs the local contract tests, builds, boots the app and checks its pages.
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  scaffold:
+    # Projects scaffolded from Sanad receive this file too, but only this repository is a template.
+    if: github.repository == 'farouk-allani/template-hedera-sanad'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["20", "24"]
+        package-manager: [yarn, npm]
+
+    steps:
+      - name: Setup node env
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      # The CLI refuses to scaffold without a git identity.
+      - name: Set a git identity
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Scaffold this commit
+        run: >
+          npm create scaffold-hbar@latest sanad --
+          --template "$GITHUB_REPOSITORY#$GITHUB_SHA"
+          --ci --frontend nextjs-app --solidity-framework hardhat --network testnet
+          --package-manager ${{ matrix.package-manager }}
+
+      - name: Check the CLI read template.json
+        run: test -f sanad/AGENTS.md && test ! -f sanad/template.json
+
+      - name: Lint
+        working-directory: sanad
+        run: ${{ matrix.package-manager }} run lint
+
+      - name: Check typings on nextjs
+        working-directory: sanad
+        run: ${{ matrix.package-manager }} run next:check-types
+
+      - name: Compile contracts
+        working-directory: sanad
+        run: ${{ matrix.package-manager }} run hardhat:compile
+
+      - name: Run contract unit tests
+        working-directory: sanad
+        run: ${{ matrix.package-manager }} run hardhat:test
+
+      - name: Build nextjs
+        working-directory: sanad
+        run: ${{ matrix.package-manager }} run next:build
+
+      - name: Boot the app and check its pages
+        working-directory: sanad
+        run: |
+          PORT=3000 ${{ matrix.package-manager }} run next:serve > serve.log 2>&1 &
+          for _ in $(seq 1 60); do curl -s -o /dev/null http://127.0.0.1:3000/ && break; sleep 1; done
+          for route in / /buy /issuer /activity; do
+            code=$(curl -s -m 20 -o /dev/null -w '%{http_code}' "http://127.0.0.1:3000$route")
+            echo "$route $code"
+            [ "$code" = 200 ] || { cat serve.log; exit 1; }
+          done
